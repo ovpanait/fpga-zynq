@@ -146,14 +146,8 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 
 	/* Initialize. Parse and pad the input. */
 	msg_index = 0;
-	H[0] = H0[0];
-	H[1] = H0[1];
-	H[2] = H0[2];
-	H[3] = H0[3];
-	H[4] = H0[4];
-	H[5] = H0[5];
-	H[6] = H0[6];
-	H[7] = H0[7];
+	for (i = 0; i < 8; ++i)
+		H[i] = H0[i];
 
 	parse_pad(co, i_msg);
 
