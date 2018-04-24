@@ -3,8 +3,13 @@
 
  `define W_SIZE 32
  `define W_MAX (`W_SIZE - 1)
- `define DELAY_MAX 4
+ `define DELAY_MAX 8
  `define DELAY (`DELAY_MAX - 1)
+
+ `define BLK_SIZE 512
+ `define BLK_MAX (`BLK_SIZE - 1)
+ `define W_SIZE 1024
+ `define W_MAX (`W_SIZE - 1)
 
 // sha256 functions
  `define rot_r(val, shift) ({val[shift - 1: 0], val[`W_MAX : shift]})
