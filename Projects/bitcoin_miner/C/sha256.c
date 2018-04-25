@@ -131,8 +131,11 @@ void parse_pad(struct sha256_data *co, char *i_msg)
 
 	#ifdef DEBUG
 	printf("final message: ");
-	for (i = 0; i < BYTES_MAX; ++i)
+	for (i = 0; i < BYTES_MAX; ++i) {
 		printf("%02X", co->msg[i]);
+		if (i == (BYTES_MAX / 2))
+			printf("\n");
+	}
 	printf("\n");
 	#endif
 }
@@ -162,6 +165,8 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 		g = H[6];
 		h = H[7];
 
+
+		// Fully unrolled
 		/* Initialize message scheduler */
 		for (t = 0; t < 64; ++t) {
 			if (t < 16)
@@ -170,15 +175,15 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 				W[t] = sig1(W[t - 2]) + W[t - 7] + sig0(W[t - 15]) + W[t - 16];
 
 			#ifdef DEBUG
-			printf("sig1(W[t - 2]): %08X\n", sig1(W[t - 2]));
-			printf("W[t - 7]: %08X\n", W[t - 7]);
-			printf("sig0(W[t - 15]):%08X\n", sig0(W[t - 15]));
-			printf("W[t - 16]: %08X\n", W[t - 16]);
+			//printf("sig1(W[t - 2]): %08X\n", sig1(W[t - 2]));
+			//printf("W[t - 7]: %08X\n", W[t - 7]);
+			//printf("sig0(W[t - 15]):%08X\n", sig0(W[t - 15]));
+			//printf("W[t - 16]: %08X\n", W[t - 16]);
 			printf("W[%u]: %08X\n", t + 1, W[t]);
-			printf("\n\n");
 			#endif
 		}
 
+		// Fully unrolled
 		/* 64 rounds */
 		for (t = 0; t < 64; ++t) {
 			T1 = h + ep1(e) + ch(e,f,g) + K[t] + W[t];
@@ -193,6 +198,7 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 			a = T1 + T2;
 		}
 
+		// 1 stage
 		H[0] += a;
 		H[1] += b;
 		H[2] += c;
