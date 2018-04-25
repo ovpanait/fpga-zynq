@@ -1,15 +1,20 @@
 `ifndef sha_vh
  `define sha_vh
 
+ `define WORD_S 32
+
  `define W_SIZE 32
  `define W_MAX (`W_SIZE - 1)
- `define DELAY_MAX 8
- `define DELAY (`DELAY_MAX - 1)
+
+ `define DELAY 32
 
  `define BLK_SIZE 512
- `define BLK_MAX (`BLK_SIZE - 1)
- `define W_SIZE 1024
- `define W_MAX (`W_SIZE - 1)
+
+ `define MSG_S 512
+ `define MSG_BLKCNT (`MSG_S / `WORD_S)
+
+ `define WARR_S 2048
+ `define W_BLKCNT (`WARR_S / `WORD_S)
 
 // sha256 functions
  `define rot_r(val, shift) ({val[shift - 1: 0], val[`W_MAX : shift]})
@@ -20,5 +25,8 @@
  `define ep1(x) (`rot_r(x, 6) ^ `rot_r(x, 11) ^ `rot_r(x, 25))
  `define sig0(x) (`rot_r(x, 7) ^ `rot_r(x, 18) ^ (x >> 3))
  `define sig1(x) (`rot_r(x, 17) ^ `rot_r(x, 19) ^ (x >> 10))
+
+// array manipulations
+ `define VEC_I(i) (i)*`W_SIZE +:`W_SIZE
 
 `endif
