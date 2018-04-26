@@ -13,8 +13,8 @@
  `define MSG_S 512
  `define MSG_BLKCNT (`MSG_S / `WORD_S)
 
- `define WARR_S 1024
- `define W_BLKCNT (`WARR_S / `WORD_S)
+ `define WARR_S `DELAY * `WORD_S
+ `define W_BLKCNT `DELAY
 
 // sha256 functions
  `define rot_r(val, shift) ({val[shift - 1: 0], val[`W_MAX : shift]})

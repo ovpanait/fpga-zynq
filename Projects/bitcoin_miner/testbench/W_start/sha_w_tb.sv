@@ -11,7 +11,7 @@ module sha_w_tb();
    wire [1023:0] W;
    wire en_out;
 
-   sha_w DUT (
+   W_start DUT (
 		.clk(clk),
 		.reset(reset),
 		.en(en),

@@ -8,8 +8,8 @@
 // Expected outputs
 `define T1_WRES1 1024'hCEF23042773E4FE9D16CCC0F2759D27027A6CAE51DDD458FB2FF0C9DB3BFFF3DAF840F975DD99DE0F9F4ECC2E8913345E57E7C442AC838A7F86712E5C3BCB09815A907C030CC0782B3D2BACEFD456CD2F5BD2EAB3513260D2CD900FC00000000000000008840290AC93B0C4ED1CA106527A51219F45DD1E9671D0E2F02000000
 
-$display("Begin testing scenario 1... \n");
-$display("Testing W output values... ");
+$display("Begin testing scenario 1...");
+$display("Testing W output and number of clock cycles... ");
 
 // Testcase init
 wait(reset)
@@ -23,11 +23,17 @@ en = 1;
 M = `T1_M1;
 end
 
-@(posedge en_out)
-tester #(1024)::verify_output(W, `T1_WRES1);
+repeat(32) @(posedge clk);
+@(negedge clk) begin
+	tester #(1)::verify_output(en_out, 1'b1);
+	tester #(1024)::verify_output(W, `T1_WRES1);
+end
+
+@(negedge clk)
+	tester #(1)::verify_output(en_out, 1'b0);
 
 // Testcase end
-reset = 1;
+@(negedge clk) reset = 1;
 @(negedge clk);
 
 $display("\nCompleted testing scenario 1 with %d errors", errors);

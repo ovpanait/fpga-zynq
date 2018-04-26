@@ -27,18 +27,17 @@ module sha_round(
 		    output reg [`W_MAX:0] h_next,
 		    output reg 		  en_next);
 
-   wire [`W_MAX:0] 			  KW_sum; 			  
+   wire [`W_MAX:0] 			  KW_sum;
    wire [`W_MAX:0] 			  T1_i, T2_i;
-   wire [`W_MAX:0] 			  T1_reg, T2_reg; 			  
+   wire [`W_MAX:0] 			  T1_reg, T2_reg;
    reg [1:0] 				  counter;
- 
+
    assign   T1_i = h + `ep1(e) + `ch(e,f,g) + K + W;
    assign   T2_i = `ep0(a) + `maj(a,b,c);
 
    assign   T1_reg = h_next + `ep1(e_next) + `ch(e_next, f_next, g_next) + K + W;
    assign   T2_reg = `ep0(a_next) + `maj(a_next, b_next, c_next);
-   
-// 4 clocks per pipeline stage
+
    always @(posedge clk)
      begin
 	if (reset == 1) begin
@@ -55,7 +54,7 @@ module sha_round(
 	else if (en == 1) begin
 	   counter <= counter + 2'h1;
 	   en_next <= 0;
-	   
+
 	   if (counter == 0) begin
 	      h_next <= g;
 	      g_next <= f;

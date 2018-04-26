@@ -1,6 +1,6 @@
 `include "sha.vh"
 
-module sha_w(
+module W_start (
 	     input 		      clk,
 	     input 		      reset,
 	     input 		      en,
@@ -13,13 +13,13 @@ module sha_w(
    wire [`WORD_S-1:0] 		      Min_arr[`MSG_BLKCNT - 1:0];
    wire [`WORD_S-1:0] 		      W_arr[`W_BLKCNT-1:0];
 
-   reg [5:0] 			      cnt = 6'h0;
+   reg [4:0] 			      cnt = 5'h0;
 
    genvar 			      i;
 
    generate
       for (i=0; i < `MSG_BLKCNT; i=i+1) begin : M_ARR
-	 assign Min_arr[i] = M[(`MSG_BLKCNT - i)*32 - 1 : (`MSG_BLKCNT - i - 1)*32];
+	 assign Min_arr[i] = M[(`MSG_BLKCNT - i)*`WORD_S - 1 : (`MSG_BLKCNT - i - 1)*`WORD_S];
       end
    endgenerate
 
@@ -33,18 +33,21 @@ module sha_w(
      begin
 	en_next <= 0;
 
-	
-	if (cnt != 6'h0 || (cnt == 6'h0 && en != 0)) begin
-	   if (cnt < 6'h10)
+	if (reset == 1) begin
+		en_next <= 0;
+		W <= {`WARR_S{1'b0}};
+	end else if (cnt != 5'h0 || (cnt == 5'h0 && en != 0)) begin
+	   if (cnt < 5'h10)
 	     W[cnt*32 +: `WORD_S] <= Min_arr[cnt];
 	   else
 	     W[cnt*32 +: `WORD_S] <= `sig1(W_arr[cnt - 2]) + W_arr[cnt - 7] + `sig0(W_arr[cnt - 15]) + W_arr[cnt - 16];
-	   if (cnt == 6'h3F) begin
+
+	   if (cnt == `DELAY - 1) begin
 	      en_next <= 1;
-	      cnt <= 6'h0;
+	      cnt <= 5'h0;
 	   end
 	   else
-	     cnt = cnt + 6'h1;
+	     cnt <= cnt + 5'h1;
 	end
      end
 endmodule // sha_w

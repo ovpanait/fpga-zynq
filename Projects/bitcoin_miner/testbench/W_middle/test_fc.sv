@@ -7,7 +7,7 @@ class tester #(int unsigned WIDTH = 32);
 	 if (simulated_value[WIDTH-1:0] != expected_value[WIDTH-1:0])
 	   begin
 	      errors = errors + 1;
-	      $display("Simulated Value = %h \n Expected Value = %h \n errors = %d \n at time = %d\n",
+	      $display("Simulated Value = %h \n Expected Value = %h \n errors = %d \n at time = %d",
 			simulated_value,
 			expected_value,
 			errors,
