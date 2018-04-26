@@ -182,6 +182,15 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 			printf("W[%u]: %08X\n", t + 1, W[t]);
 			#endif
 		}
+		
+		// Debug W
+		#ifdef DEBUG
+		printf("\n");
+		printf("W:\n");
+		for (t = 32; t > 0; --t)
+			printf("%08X", W[t-1]);
+		printf("\n");
+		#endif
 
 		// Fully unrolled
 		/* 64 rounds */
