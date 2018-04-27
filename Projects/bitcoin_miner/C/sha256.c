@@ -195,6 +195,12 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 		// Fully unrolled
 		/* 64 rounds */
 		for (t = 0; t < 64; ++t) {
+			#ifdef DEBUG
+			printf("Hash[%u] - In\n", t);
+			printf("%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n\n",
+				a, b, c, d, e, f, g, h);
+			#endif
+			
 			T1 = h + ep1(e) + ch(e,f,g) + K[t] + W[t];
 			T2 = ep0(a) + maj(a,b,c);
 			h = g;
@@ -205,6 +211,12 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 			c = b;
 			b = a;
 			a = T1 + T2;
+			
+			#ifdef DEBUG
+			printf("Hash[%u] - Out\n", t);
+			printf("%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n\n",
+				a, b, c, d, e, f, g, h);
+			#endif
 		}
 
 		// 1 stage
