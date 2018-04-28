@@ -14,8 +14,8 @@ module sha_round(
 		    input [`W_MAX:0] 	  g,
 		    input [`W_MAX:0] 	  h,
 
-		    input 		  K,
-		    input 		  W,
+		    input [`WARR_S-1:0]	  K,
+		    input [`WARR_S-1:0]	  W,
 
 		    output reg [`W_MAX:0] a_next,
 		    output reg [`W_MAX:0] b_next,
@@ -27,20 +27,37 @@ module sha_round(
 		    output reg [`W_MAX:0] h_next,
 		    output reg 		  en_next);
 
-   wire [`W_MAX:0] 			  KW_sum;
+   wire [`WORD_S-1:0] 		      W_arr[`W_BLKCNT-1:0];
+   wire [`WORD_S-1:0] 		      K_arr[`W_BLKCNT-1:0];
+
    wire [`W_MAX:0] 			  T1_i, T2_i;
    wire [`W_MAX:0] 			  T1_reg, T2_reg;
-   reg [1:0] 				  counter;
+   reg [4:0] 				  counter;
 
-   assign   T1_i = h + `ep1(e) + `ch(e,f,g) + K + W;
+   genvar 			      i;
+
+   generate
+      for (i=0; i < `W_BLKCNT; i=i+1) begin : WIN_ARR
+	 assign  W_arr[i] = W[(i+1)*32 - 1:i*32];
+      end
+   endgenerate
+
+   generate
+      for (i=0; i < `W_BLKCNT; i=i+1) begin : KIN_ARR
+	 assign  K_arr[i] = K[(i+1)*32 - 1:i*32];
+      end
+   endgenerate
+
+   assign   T1_i = h + `ep1(e) + `ch(e,f,g) + K_arr[counter] + W_arr[counter];
    assign   T2_i = `ep0(a) + `maj(a,b,c);
 
-   assign   T1_reg = h_next + `ep1(e_next) + `ch(e_next, f_next, g_next) + K + W;
+   assign   T1_reg = h_next + `ep1(e_next) + `ch(e_next, f_next, g_next) + K_arr[counter] + W_arr[counter];
    assign   T2_reg = `ep0(a_next) + `maj(a_next, b_next, c_next);
 
    always @(posedge clk)
      begin
 	if (reset == 1) begin
+	   counter <= 5'h0;
 	   a_next <= `W_SIZE'd0;
 	   b_next <= `W_SIZE'd0;
 	   c_next <= `W_SIZE'd0;
@@ -51,11 +68,11 @@ module sha_round(
 	   h_next <= `W_SIZE'd0;
 	   en_next <= 1'd0;
 	end // if (reset == 0)
-	else if (en == 1) begin
-	   counter <= counter + 2'h1;
+	else if (counter != 5'h0  || (en == 1 && counter == 5'h0)) begin
+	   counter <= counter + 5'h1;
 	   en_next <= 0;
 
-	   if (counter == 0) begin
+	   if (counter == 5'h0) begin
 	      h_next <= g;
 	      g_next <= f;
 	      f_next <= e;
@@ -66,9 +83,9 @@ module sha_round(
 	      a_next <= T1_i + T2_i;
 	   end
 	   else begin
-	      if (counter == `DELAY) begin
+	      if (counter == 5'h1F) begin
 		 en_next <= 1;
-		 counter <= 2'h0;
+		 counter <= 5'h0;
 	      end
 	      h_next <= g_next;
 	      g_next <= f_next;

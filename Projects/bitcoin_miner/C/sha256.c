@@ -182,7 +182,7 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 			printf("W[%u]: %08X\n", t + 1, W[t]);
 			#endif
 		}
-		
+
 		// Debug W
 		#ifdef DEBUG
 		printf("\n");
@@ -200,7 +200,7 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 			printf("%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n\n",
 				a, b, c, d, e, f, g, h);
 			#endif
-			
+
 			T1 = h + ep1(e) + ch(e,f,g) + K[t] + W[t];
 			T2 = ep0(a) + maj(a,b,c);
 			h = g;
@@ -211,7 +211,7 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 			c = b;
 			b = a;
 			a = T1 + T2;
-			
+
 			#ifdef DEBUG
 			printf("Hash[%u] - Out\n", t);
 			printf("%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n\n",
@@ -254,6 +254,11 @@ int main(int argc, char **argv)
 	assert(rot_l32(0xFFFFFF00, 0) == 0xFFFFFF00);
 	assert(rot_l32(0x12FFFF00, 32) == 0x12FFFF00);
 	printf("Success\n");
+
+	printf("K - 32:\n");
+	for (int i = 31; i >= 0; --i)
+		printf("%08X", K[i]);
+	printf("\n");
 
 	#define DEBUG_TESTVAL "02000000671D0E2FF45DD1E927A51219D1CA1065C93B0C4E8840290A00000000000000002CD900FC3513260DF5BD2EABFD456CD2B3D2BACE30CC078215A907C045F4992E74749054747B1B1843F740C0"
 	printf("sig1: %08X\n", sig1(0x8207CC30));

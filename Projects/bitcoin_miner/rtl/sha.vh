@@ -16,6 +16,8 @@
  `define WARR_S `DELAY * `WORD_S
  `define W_BLKCNT `DELAY
 
+ `define H_SIZE `WORD_S * 8
+
 // sha256 functions
  `define rot_r(val, shift) ({val[shift - 1: 0], val[`W_MAX : shift]})
  `define rot_l(val, shift) ({val[`W_MAX - shift: 0], val[`W_MAX : `W_SIZE - shift]})
