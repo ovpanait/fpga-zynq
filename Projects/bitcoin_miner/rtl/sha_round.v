@@ -56,6 +56,7 @@ module sha_round(
 
    always @(posedge clk)
      begin
+	en_next <= 0;
 	if (reset == 1) begin
 	   counter <= 5'h0;
 	   a_next <= `W_SIZE'd0;
@@ -66,11 +67,9 @@ module sha_round(
 	   f_next <= `W_SIZE'd0;
 	   g_next <= `W_SIZE'd0;
 	   h_next <= `W_SIZE'd0;
-	   en_next <= 1'd0;
 	end // if (reset == 0)
 	else if (counter != 5'h0  || (en == 1 && counter == 5'h0)) begin
 	   counter <= counter + 5'h1;
-	   en_next <= 0;
 
 	   if (counter == 5'h0) begin
 	      h_next <= g;

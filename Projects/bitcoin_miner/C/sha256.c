@@ -229,6 +229,12 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 		H[6] += g;
 		H[7] += h;
 
+		#ifdef DEBUG
+		printf("Stage %d || Hash:\n", i);
+		for (t = 0; t < 8; ++t)
+			printf("%08X", H[t]);
+		printf("\n");
+		#endif
 		/* Go to block M2 */
 		msg_index += 64;
 	}
@@ -255,9 +261,14 @@ int main(int argc, char **argv)
 	assert(rot_l32(0x12FFFF00, 32) == 0x12FFFF00);
 	printf("Success\n");
 
+	printf("H0 :\n");
+	for (int i = 7; i >= 0; --i)
+		printf("32'h%08X, ", H0[i]);
+	printf("\n");
+
 	printf("K - 32:\n");
-	for (int i = 31; i >= 0; --i)
-		printf("%08X", K[i]);
+	for (int i = 63; i >= 0; --i)
+		printf("32'h%08X, ", K[i]);
 	printf("\n");
 
 	#define DEBUG_TESTVAL "02000000671D0E2FF45DD1E927A51219D1CA1065C93B0C4E8840290A00000000000000002CD900FC3513260DF5BD2EABFD456CD2B3D2BACE30CC078215A907C045F4992E74749054747B1B1843F740C0"
