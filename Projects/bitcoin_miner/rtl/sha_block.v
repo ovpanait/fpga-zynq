@@ -12,7 +12,10 @@ module sha_block(
 
 wire [`WARR_S-1:0] W[1:0];
 wire [`WORD_S-1:0] tmp[7:0];
-wire [`WORD_S-1:0] Hin[7:0];
+wire [`WORD_S-1:0] H_in[7:0];
+
+wire [`H_SIZE-1:0] H_tmp[2:0];
+
 wire en_o[3:0];
 
 localparam K = {
@@ -47,7 +50,10 @@ W_start w_b(
 	.reset(reset),
 	.en(en),
 	.M(M),
+	.Hin({H0[`VEC_I(7)], H0[`VEC_I(6)], H0[`VEC_I(5)], H0[`VEC_I(4)], H0[`VEC_I(3)], H0[`VEC_I(2)], H0[`VEC_I(1)], H0[`VEC_I(0)]}),
+
 	.W(W[0]),
+	.H(H_tmp[0]),
 	.en_next(en_o[0]));
 
 W_middle w_e(
@@ -61,7 +67,7 @@ W_middle w_e(
 sha_round round1(
 	.clk(clk),
 	.reset(reset),
-	.en(en_o[1]),
+	.en(en_o[0]),
 
 	.a(H0[`VEC_I(7)]),
 	.b(H0[`VEC_I(6)]),
@@ -71,6 +77,7 @@ sha_round round1(
 	.f(H0[`VEC_I(2)]),
 	.g(H0[`VEC_I(1)]),
 	.h(H0[`VEC_I(0)]),
+	.Hin(H_tmp[0]),
 
 	.a_next(tmp[0]),
 	.b_next(tmp[1]),
@@ -83,6 +90,7 @@ sha_round round1(
 
 	.K(K[1023:0]),
 	.W(W[0]),
+	.H(H_tmp[1]),
 
 	.en_next(en_o[2])
 	);
@@ -100,39 +108,41 @@ sha_round round2(
 	.f(tmp[5]),
 	.g(tmp[6]),
 	.h(tmp[7]),
+	.Hin(H_tmp[1]),
 
 	.K(K[2047:1024]),
 	.W(W[1]),
 
-	.a_next(Hin[0]),
-	.b_next(Hin[1]),
-	.c_next(Hin[2]),
-	.d_next(Hin[3]),
-	.e_next(Hin[4]),
-	.f_next(Hin[5]),
-	.g_next(Hin[6]),
-	.h_next(Hin[7]),
+	.a_next(H_in[0]),
+	.b_next(H_in[1]),
+	.c_next(H_in[2]),
+	.d_next(H_in[3]),
+	.e_next(H_in[4]),
+	.f_next(H_in[5]),
+	.g_next(H_in[6]),
+	.h_next(H_in[7]),
+	.H(H_tmp[2]),
 
 	.en_next(en_o[3])
 	);
 
-sha_hash hash_out(
+sha_hash hash_out (
 	.clk(clk),
 	.reset(reset),
-	.en_H(en),
-	.en_regs(en_o[3]),
+	.en(en_o[3]),
+	.H_i(H_tmp[2]),
 
-	.H_prev({H0[`VEC_I(7)], H0[`VEC_I(6)], H0[`VEC_I(5)], H0[`VEC_I(4)], H0[`VEC_I(3)], H0[`VEC_I(2)], H0[`VEC_I(1)], H0[`VEC_I(0)]}),
-	.a(Hin[0]),
-	.b(Hin[1]),
-	.c(Hin[2]),
-	.d(Hin[3]),
-	.e(Hin[4]),
-	.f(Hin[5]),
-	.g(Hin[6]),
-	.h(Hin[7]),
+	.a(H_in[0]),
+	.b(H_in[1]),
+	.c(H_in[2]),
+	.d(H_in[3]),
+	.e(H_in[4]),
+	.f(H_in[5]),
+	.g(H_in[6]),
+	.h(H_in[7]),
 
 	.H(H),
-	.en_o(en_next));
+	.en_o(en_next)
+	);
 
 endmodule

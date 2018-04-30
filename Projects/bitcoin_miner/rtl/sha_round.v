@@ -1,6 +1,7 @@
 `include "sha.vh"
 
-module sha_round(
+module sha_round #(parameter exit=0)
+(
 		    input 		  clk,
 		    input 		  reset,
 		    input 		  en,
@@ -16,6 +17,7 @@ module sha_round(
 
 		    input [`WARR_S-1:0]	  K,
 		    input [`WARR_S-1:0]	  W,
+		    input [`H_SIZE-1:0]	  Hin,
 
 		    output reg [`W_MAX:0] a_next,
 		    output reg [`W_MAX:0] b_next,
@@ -25,7 +27,9 @@ module sha_round(
 		    output reg [`W_MAX:0] f_next,
 		    output reg [`W_MAX:0] g_next,
 		    output reg [`W_MAX:0] h_next,
-		    output reg 		  en_next);
+
+		    output reg [`H_SIZE-1:0] H,
+		    output reg		  en_next);
 
    wire [`WORD_S-1:0] 		      W_arr[`W_BLKCNT-1:0];
    wire [`WORD_S-1:0] 		      K_arr[`W_BLKCNT-1:0];
@@ -57,6 +61,7 @@ module sha_round(
    always @(posedge clk)
      begin
 	en_next <= 0;
+
 	if (reset == 1) begin
 	   counter <= 5'h0;
 	   a_next <= `W_SIZE'd0;
@@ -67,10 +72,16 @@ module sha_round(
 	   f_next <= `W_SIZE'd0;
 	   g_next <= `W_SIZE'd0;
 	   h_next <= `W_SIZE'd0;
+
 	end // if (reset == 0)
 	else if (counter != 5'h0  || (en == 1 && counter == 5'h0)) begin
 	   counter <= counter + 5'h1;
 
+	   // Save previous hash
+	   if (en == 1)
+		H <= Hin;
+
+	   // Processing
 	   if (counter == 5'h0) begin
 	      h_next <= g;
 	      g_next <= f;
@@ -83,8 +94,8 @@ module sha_round(
 	   end
 	   else begin
 	      if (counter == 5'h1F) begin
-		 en_next <= 1;
 		 counter <= 5'h0;
+		 en_next <= 1;
 	      end
 	      h_next <= g_next;
 	      g_next <= f_next;

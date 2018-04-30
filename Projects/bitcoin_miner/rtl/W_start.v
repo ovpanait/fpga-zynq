@@ -5,8 +5,10 @@ module W_start (
 	     input 		      reset,
 	     input 		      en,
 	     input [`MSG_S-1:0]       M,
+	     input [`H_SIZE-1:0]      Hin,
 
 	     output reg [`WARR_S-1:0] W,
+	     output reg [`H_SIZE-1:0] H,
 	     output reg 	      en_next
 	     );
 
@@ -36,7 +38,13 @@ module W_start (
 	if (reset == 1) begin
 		en_next <= 0;
 		W <= {`WARR_S{1'b0}};
+		H <= {`H_SIZE{1'b0}};
 	end else if (cnt != 5'h0 || (cnt == 5'h0 && en != 0)) begin
+	   // Save previous hash buffer
+	   if (en == 1)
+		H <= Hin;
+
+	   // Processing
 	   if (cnt < 5'h10)
 	     W[cnt*32 +: `WORD_S] <= Min_arr[cnt];
 	   else
