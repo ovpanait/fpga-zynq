@@ -19,6 +19,10 @@
  `define H_SIZE `WORD_S * 8
  `define H_BLKCNT 8
 
+ `define K_SIZE `WORD_S * 64
+
+ `define INPUT_S 96
+
 // sha256 functions
  `define rot_r(val, shift) ({val[shift - 1: 0], val[`W_MAX : shift]})
  `define rot_l(val, shift) ({val[`W_MAX - shift: 0], val[`W_MAX : `W_SIZE - shift]})
@@ -31,5 +35,11 @@
 
 // array manipulations
  `define VEC_I(i) (i)*`W_SIZE +:`W_SIZE
+ `define VEC8(i) (i)*8 +: 8
+ `define CH_END32(v, i) {v[`VEC8(i)], v[`VEC8(i+1)], v[`VEC8(i+2)], v[`VEC8(i+3)]}
+ `define CH_HASH(v) { \
+	`CH_END32(v, 0), `CH_END32(v, 4), `CH_END32(v, 8), `CH_END32(v, 12),  \
+	`CH_END32(v, 16), `CH_END32(v, 20), `CH_END32(v, 24), `CH_END32(v, 28) \
+  }
 
 `endif

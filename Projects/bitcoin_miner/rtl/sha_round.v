@@ -15,6 +15,7 @@ module sha_round #(parameter exit=0)
 		    input [`W_MAX:0] 	  g,
 		    input [`W_MAX:0] 	  h,
 
+		    input [`WORD_S-1:0]	  nonce,
 		    input [`WARR_S-1:0]	  K,
 		    input [`WARR_S-1:0]	  W,
 		    input [`H_SIZE-1:0]	  Hin,
@@ -28,6 +29,7 @@ module sha_round #(parameter exit=0)
 		    output reg [`W_MAX:0] g_next,
 		    output reg [`W_MAX:0] h_next,
 
+		    output reg [`WORD_S-1:0] nonce_out,
 		    output reg [`H_SIZE-1:0] H,
 		    output reg		  en_next);
 
@@ -73,13 +75,17 @@ module sha_round #(parameter exit=0)
 	   g_next <= `W_SIZE'd0;
 	   h_next <= `W_SIZE'd0;
 
+	   H <= {`H_SIZE{1'b0}};
+	   nonce_out <= {`WORD_S{1'b0}};
 	end // if (reset == 0)
 	else if (counter != 5'h0  || (en == 1 && counter == 5'h0)) begin
 	   counter <= counter + 5'h1;
 
-	   // Save previous hash
-	   if (en == 1)
+	   // Buffer for some values
+	   if (en == 1) begin
 		H <= Hin;
+		nonce_out <= nonce;
+	   end
 
 	   // Processing
 	   if (counter == 5'h0) begin

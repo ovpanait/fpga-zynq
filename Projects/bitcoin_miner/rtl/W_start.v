@@ -4,9 +4,12 @@ module W_start (
 	     input 		      clk,
 	     input 		      reset,
 	     input 		      en,
+
+	     input [`WORD_S-1:0]      nonce,
 	     input [`MSG_S-1:0]       M,
 	     input [`H_SIZE-1:0]      Hin,
 
+	     output reg [`WORD_S-1:0] nonce_out,
 	     output reg [`WARR_S-1:0] W,
 	     output reg [`H_SIZE-1:0] H,
 	     output reg 	      en_next
@@ -39,10 +42,13 @@ module W_start (
 		en_next <= 0;
 		W <= {`WARR_S{1'b0}};
 		H <= {`H_SIZE{1'b0}};
+		nonce_out <= {`WORD_S{1'b0}};
 	end else if (cnt != 5'h0 || (cnt == 5'h0 && en != 0)) begin
 	   // Save previous hash buffer
-	   if (en == 1)
+	   if (en == 1) begin
 		H <= Hin;
+		nonce_out <= nonce;
+	   end
 
 	   // Processing
 	   if (cnt < 5'h10)
