@@ -29,11 +29,10 @@ module miner_top(
   reg [95:0] input_M;
   
   reg spi_clk;
-  reg [3:0] clk_cnt;
   
-  SPI_slave spi_slave(spi_clk, sck, mosi, miso, ssel, byte_received, received_data, data_needed, data_to_send);
+  SPI_slave spi_slave(clk, sck, mosi, miso, ssel, byte_received, received_data, data_needed, data_to_send);
 
-  always @(posedge spi_clk) begin
+  always @(posedge clk) begin
 	if (reset) begin
 		data_to_send <= `WAITING;
 		byte_cnt <= 7'h0;
@@ -84,14 +83,4 @@ module miner_top(
 			endcase
 	end
   end
-
-
-	always @(posedge clk) begin
-		if (clk_cnt == 14) begin
-			spi_clk <= ~spi_clk;
-			clk_cnt <= 4'h0;
-		end else
-			clk_cnt <= clk_cnt + 1;
-		
-	end
 endmodule
