@@ -43,6 +43,9 @@ localparam H0 = {
 localparam padding_512 = 384'h800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000280;
 localparam padding_256 = 256'h8000000000000000000000000000000000000000000000000000000000000100;
 
+localparam 	ready = 1'b0, // waiting for input
+		proc = 1'b1; // feeding the pipeline
+
 wire [`H_SIZE-1:0] H_tmp;
 wire [`H_SIZE-1:0] H_final;
 wire en_tmp[1:0];
@@ -54,6 +57,8 @@ wire [`WORD_S-1:0] hash_nonce;
 reg start;
 reg [`WORD_S-1:0] nonce_reg;
 reg [5:0] cnt;
+
+reg state;
 
 sha_block block1(
 	.clk(clk),
@@ -86,38 +91,47 @@ sha_block block2(
 	);
 
 always @(posedge clk) begin
-	start <= 0;
-	done <= 0;
-	found <= 0;
-
 	if (reset == 1) begin
 		nonce <= {`WORD_S{1'b0}};
 		done <= 0;
 		found <= 0;
+		start <= 0;
 		cnt <= 6'h0;
-	end else begin
-		if (en == 1) begin
-			//nonce_reg <= {`WORD_S{1'b0}};
-			nonce_reg <= 32'h43F740C0;
-			start <= 1;
-		end else begin
-			cnt <= cnt + 1;
-			if (cnt == 6'h20) begin
-				if (nonce_reg == {`WORD_S{1'b1}})
-					done <= 1;
-				else begin
-					nonce_reg <= nonce_reg + 1;
+		state <= ready;
+	end else
+		start <= 0;
+		case (state)
+			ready:
+				if (en == 1) begin
+					//nonce_reg <= {`WORD_S{1'b0}};
+					nonce_reg <= 32'h43F740C0;
 					start <= 1;
+					done <= 0;
+					found <= 0;
+					cnt <= 6'h0;
+					state <= proc;
 				end
-			cnt <= 6'h0;
-			end
-		end
+			proc: begin
+				cnt <= cnt + 1;
+				if (hash_done == 1 &&  `CH_HASH(H_final) < prev_blk) begin
+					done <= 1;
+					found <= 1;
+					nonce <= hash_nonce;
+					winner_H <= `CH_HASH(H_final);
+					state <= ready;
+				end
 
-		if (hash_done == 1 &&  `CH_HASH(H_final) < prev_blk) begin
-			found <= 1;
-			nonce <= hash_nonce;
-			winner_H <= `CH_HASH(H_final);
-		end
-	end
+				if (cnt == 6'h20) begin
+					if (nonce_reg == {`WORD_S{1'b1}}) begin
+						done <= 1;
+						state <= ready;
+					end else begin
+						nonce_reg <= nonce_reg + 1;
+						start <= 1;
+					end
+				cnt <= 6'h0;
+				end
+			end
+		endcase
 end
 endmodule
