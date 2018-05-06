@@ -37,6 +37,19 @@ end
 	$display("winner H: %h", winner_H);
 end
 
+repeat(5000) @(posedge clk);
+en = 1;
+
+@(posedge clk);
+en = 0;
+
+@ (posedge done);
+@(negedge clk) begin
+	//tester #(256)::verify_output(H, `T1_H1);
+	$display("nonce: %h", nonce);
+	$display("winner H: %h", winner_H);
+end
+
 // Testcase end
 @(negedge clk) reset = 1;
 @(negedge clk);

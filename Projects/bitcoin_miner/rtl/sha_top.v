@@ -43,8 +43,9 @@ localparam H0 = {
 localparam padding_512 = 384'h800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000280;
 localparam padding_256 = 256'h8000000000000000000000000000000000000000000000000000000000000100;
 
-localparam 	ready = 1'b0, // waiting for input
-		proc = 1'b1; // feeding the pipeline
+localparam 	ready = 2'b00, // waiting for input
+		proc = 2'b01, // feeding the pipeline
+		ending = 2'b11;
 
 wire [`H_SIZE-1:0] H_tmp;
 wire [`H_SIZE-1:0] H_final;
@@ -58,7 +59,7 @@ reg start;
 reg [`WORD_S-1:0] nonce_reg;
 reg [5:0] cnt;
 
-reg state;
+reg [1:0] state;
 
 sha_block block1(
 	.clk(clk),
@@ -101,36 +102,44 @@ always @(posedge clk) begin
 	end else
 		start <= 0;
 		case (state)
-			ready:
+			ready: begin
+				done <= 0;
+				found <= 0;
 				if (en == 1) begin
 					//nonce_reg <= {`WORD_S{1'b0}};
-					nonce_reg <= 32'h43F740C0;
+					nonce_reg <= 32'hFFFFFFF0;
 					start <= 1;
-					done <= 0;
-					found <= 0;
 					cnt <= 6'h0;
 					state <= proc;
 				end
+			end
 			proc: begin
-				cnt <= cnt + 1;
-				if (hash_done == 1 &&  `CH_HASH(H_final) < prev_blk) begin
+				if (hash_done &&  `CH_HASH(H_final) < prev_blk) begin
 					done <= 1;
 					found <= 1;
 					nonce <= hash_nonce;
 					winner_H <= `CH_HASH(H_final);
-					state <= ready;
+					state <= ending;
+				end else if (hash_done && nonce_reg == {`WORD_S{1'b1}}) begin
+					done <= 1;
+					found <= 0;
+					state <= ending;
+				end else begin
+					if (cnt == 6'h20) begin
+						if (nonce_reg != {`WORD_S{1'b1}}) begin
+							nonce_reg <= nonce_reg + 1;
+							start <= 1;
+							cnt <= 6'h0;
+						end
+					end else 
+						cnt <= cnt + 1;
 				end
-
-				if (cnt == 6'h20) begin
-					if (nonce_reg == {`WORD_S{1'b1}}) begin
-						done <= 1;
-						state <= ready;
-					end else begin
-						nonce_reg <= nonce_reg + 1;
-						start <= 1;
-					end
-				cnt <= 6'h0;
-				end
+			end
+			ending: begin
+				done <= 0;
+				found <= 0;
+				state <= ready;
+				cnt <= 0;
 			end
 		endcase
 end

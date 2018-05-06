@@ -6,7 +6,7 @@
 `define GET_STATE 8'hA3
 `define GET_MSG 8'hA4
 `define DONE 8'hA5
-`define DONE_FOUND 8'h6
+`define DONE_FOUND 8'hA6
 
 module miner_top(
 	input clk,
@@ -87,17 +87,14 @@ module miner_top(
 			byte_cnt <= byte_cnt + 7'h1;
 
 			if (byte_cnt < 32) begin // first stage hash
-				data_to_send <= first_stage_hash[255:255-7];
-				first_stage_hash <= {first_stage_hash[255-8:0], 8'h0};
-			end else if(byte_cnt < 44) begin // input message
-				data_to_send <= input_M[95:95-7];
-				input_M <= {input_M[95-8:0], 8'h0};
+				data_to_send <= res_hash[255:255-7];
+				res_hash <= {res_hash[255-8:0], 8'h0};
 			end else begin // previous block
-				data_to_send <= prev_blk[255:255-7];
-				first_stage_hash <= {prev_blk[255-8:0], 8'h0};
+				data_to_send <= res_nonce[31:31-7];
+				res_nonce <= {res_nonce[31-8:0], 8'h0};
 			end
 
-			if (byte_cnt == 75) begin
+			if (byte_cnt == 36) begin
 				byte_cnt <= 5'h0;
 				sending_data <= 0;
 				data_to_send <= `WAITING;
