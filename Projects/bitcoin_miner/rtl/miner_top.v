@@ -65,6 +65,7 @@ module miner_top(
 		receiving_data <= 0;
 		sending_data <= 0;
 		first_stage_hash <= {256{1'b0}};
+		prev_blk <= {256{1'b0}};
 		input_M <= {96{1'b0}};
 	end else if (byte_received) begin
 		if (receiving_data) begin

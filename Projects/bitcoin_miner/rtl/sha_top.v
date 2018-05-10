@@ -106,8 +106,8 @@ always @(posedge clk) begin
 				done <= 0;
 				found <= 0;
 				if (en == 1) begin
-					//nonce_reg <= {`WORD_S{1'b0}};
-					nonce_reg <= 32'hFFFFFFF0;
+					//nonce_reg <= 32'hFFFFFF00;
+					nonce_reg <= {`WORD_S{1'b0}};
 					start <= 1;
 					cnt <= 6'h0;
 					state <= proc;
