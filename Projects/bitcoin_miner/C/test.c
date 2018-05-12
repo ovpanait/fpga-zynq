@@ -13,7 +13,10 @@
 #define BYTES_NR 76
 #define TIME_OFFSET 40
 
-static uint8_t tx_buf[76] = {
+#define HASH_ENDOFF 32
+#define NONCE_ENDOFF 36
+
+static uint8_t tx_buf[BYTES_NR] = {
 	0x09, 0xA0, 0xD1, 0x91, 0x92, 0xEF, 0x77, 0xC3, 0x04, 0xFE, 0x44,
 	0x78, 0x88, 0xF9, 0xEF, 0x50, 0x69, 0xD6, 0x48, 0x46, 0x5A, 0x19,
 	0x14, 0x6F, 0xB7, 0x70, 0x61, 0x97, 0x14, 0xD0, 0x89, 0x04, 0x45,
@@ -37,7 +40,7 @@ int main(int argc, char **argv)
 		perror("Could not open dev");
 		exit(EXIT_FAILURE);
 	}
-	
+
 	sleep(1);
 
 while(1) {
@@ -49,10 +52,10 @@ while(1) {
 			perror ("write");
 			exit(EXIT_FAILURE);
 		}
-		if (ret == 76)
+		if (ret == BYTES_NR)
 			break;
 	}
-	
+
 	while (1) {
 		ret = read(fd, rx_buf, BYTES_NR);
 		if (ret == -1) {
@@ -69,11 +72,13 @@ while(1) {
 			break;
 	}
 
-	for (i=0; i < 32; ++i)
+	printf("Hash: 0x");
+	for (i=0; i < HASH_ENDOFF; ++i)
 		printf("%02X", rx_buf[i]);
 	printf("\n");
 
-	for (; i < 36; ++i)
+	printf("Nonce: 0x");
+	for (; i < NONCE_ENDOFF; ++i)
 		printf("%02X", rx_buf[i]);
 	printf("\n\n");
 
