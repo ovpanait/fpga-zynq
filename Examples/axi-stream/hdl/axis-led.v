@@ -1,9 +1,3 @@
-/*
- *
- * AXI4-Stream slave test.
- * Toggle leds based on the last 32 bytes received.
- * 
- */
 
 `timescale 1 ns / 1 ps
 
@@ -57,11 +51,14 @@ module myip_v1_0_S00_AXIS #
    // and outputs the streaming data from the FIFO
    parameter [1:0] IDLE = 1'b0,        // This is the initial/idle state 
 
-     WRITE_FIFO  = 1'b1; // In this state FIFO is written with the
-   // input stream data S_AXIS_TDATA 
+     WRITE_FIFO  = 1'b1, // In this state FIFO is written with the
+     // input stream data S_AXIS_TDATA
+ 
+     PROCESS_STUFF = 2'b11; // In this state data is being processed
+   
    wire  	axis_tready;
    // State variable
-   reg 		mst_exec_state;  
+   reg [1:0] 	mst_exec_state;  
    // FIFO implementation signals
    genvar 	byte_index;     
    // FIFO write enable
@@ -102,7 +99,7 @@ module myip_v1_0_S00_AXIS #
 	      // the interface swiches functionality to a streaming master
 	      if (writes_done)
 	        begin
-	           mst_exec_state <= IDLE;
+	           mst_exec_state <= PROCESS_STUFF;
 	        end
 	      else
 	        begin
@@ -110,14 +107,22 @@ module myip_v1_0_S00_AXIS #
 	           // into FIFO
 	           mst_exec_state <= WRITE_FIFO;
 	        end
-
+            PROCESS_STUFF:
+              if (processing_done)
+		begin
+                   mst_exec_state <= IDLE;
+		end
+              else
+		begin
+                   mst_exec_state <= PROCESS_STUFF;
+		end
 	  endcase
      end
    // AXI Streaming Sink 
    // 
    // The example design sink is always ready to accept the S_AXIS_TDATA  until
    // the FIFO is not filled with NUMBER_OF_INPUT_WORDS number of input words.
-   assign axis_tready = ((mst_exec_state == WRITE_FIFO) && (write_pointer <= NUMBER_OF_INPUT_WORDS-1)) && !writes_done;
+   assign axis_tready = ((mst_exec_state == WRITE_FIFO) && !writes_done);
 
    always@(posedge S_AXIS_ACLK)
      begin
@@ -140,16 +145,12 @@ module myip_v1_0_S00_AXIS #
                      write_pointer <= write_pointer + 1;
 	          end
 	       end
-	     else if (writes_done) begin
-                // Start Processing Stuff
-                if (not_equal)
-                  led <= 4'b0011;
-                else 
-                  led <= 4'b1100;
-                
-                writes_done <= 1'b0;
-                write_pointer <= 1'b0;
-             end
+	     
+	     if (processing_done)
+	       begin
+	          write_pointer <= 1'b0;
+	          writes_done <= 1'b0;
+	       end
 	  end
      end
 
@@ -167,12 +168,15 @@ module myip_v1_0_S00_AXIS #
           begin
              stream_data_fifo[write_pointer] <= S_AXIS_TDATA;
           end  
-     end  
+     end
 
-   // Add user logic here
    wire not_equal;
    reg 	reads_done;
-   
+   reg 	processing_done;
+   wire start_processing;
+
+   assign start_processing = (mst_exec_state == PROCESS_STUFF) && !processing_done;
+
    assign not_equal =  (stream_data_fifo[0] ^
                         stream_data_fifo[1] ^
                         stream_data_fifo[2] ^
@@ -181,5 +185,21 @@ module myip_v1_0_S00_AXIS #
                         stream_data_fifo[5] ^
                         stream_data_fifo[6] ^
                         stream_data_fifo[7]) ? 1 :0; // hardcode this shit
+
+   // Processing routine
+   always @(posedge S_AXIS_ACLK)
+     begin
+        processing_done <= 1'b0;
+
+        if (start_processing)
+          begin
+             if (not_equal)
+               led <= 4'b0011;
+             else 
+               led <= 4'b1100;
+             
+             processing_done <= 1'b1;
+          end  
+     end
 
 endmodule
