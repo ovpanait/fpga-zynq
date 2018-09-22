@@ -9,7 +9,7 @@
 
 import axi4stream_vip_pkg::*;
 import ex_sim_axi4stream_vip_mst_0_pkg::*;
-import ex_sim_axi4stream_vip_slv_0_pkg::*;
+import ex_sim_axi4stream_vip_0_0_pkg::*;
 
 module axi4stream_vip_0_exdes_tb(
   );
@@ -42,7 +42,7 @@ module axi4stream_vip_0_exdes_tb(
   xil_axi4stream_uint                           slv_agent_verbosity = 0;
 
   ex_sim_axi4stream_vip_mst_0_mst_t                              mst_agent;
-  ex_sim_axi4stream_vip_slv_0_slv_t                              slv_agent;
+  ex_sim_axi4stream_vip_0_0_slv_t                              slv_agent;
 
   // Clock signal
   bit                                     clock;
@@ -56,11 +56,14 @@ module axi4stream_vip_0_exdes_tb(
     .aclk(clock)
   );
 
-  initial begin
-    reset <= 1'b1;
-  end
-  
   always #10 clock <= ~clock;
+
+  initial
+  begin
+    reset <= 0;
+    @(posedge clock);
+    @(negedge clock) reset <= 1;    
+  end
 
   //Main process
   initial begin
@@ -87,7 +90,7 @@ module axi4stream_vip_0_exdes_tb(
       begin
         mst_gen_transaction();
         $display("Simple master to slave transfer example with randomization completes");
-        for(int i = 0; i < 4;i++) begin
+        for(int i = 0; i < 8;i++) begin
           mst_gen_transaction();
         end  
         $display("Looped master to slave transfers example with randomization completes");
@@ -98,7 +101,7 @@ module axi4stream_vip_0_exdes_tb(
     join
     
 
-    wait(comparison_cnt == 5);
+    wait(comparison_cnt == 8);
    
     if(error_cnt ==0) begin
       $display("EXAMPLE TEST DONE : Test Completed Successfully");
@@ -145,18 +148,28 @@ module axi4stream_vip_0_exdes_tb(
   initial begin
    forever begin
       wait (master_moniter_transaction_queue_size>0 ) begin
+        xil_axi4stream_data_byte mst_data [4];
         mst_scb_transaction = master_moniter_transaction_queue.pop_front;
-	$display("xxx2: %d", mst_scb_transaction);
         master_moniter_transaction_queue_size--;
-        wait( slave_moniter_transaction_queue_size>0) begin
+        
+        mst_scb_transaction.get_data(mst_data);
+        wait (slave_moniter_transaction_queue_size > 0) begin
+          xil_axi4stream_data_byte slv_data [4];
           slv_scb_transaction = slave_moniter_transaction_queue.pop_front;
-          $display("xxx3: %d", slv_scb_transaction);
-	  slave_moniter_transaction_queue_size--;
-          if (slv_scb_transaction.do_compare(mst_scb_transaction) == 0) begin
-            $display("ERROR:  Master VIP against Slave VIP scoreboard Compare failed");
-            error_cnt++;
-          end else begin
+          slave_moniter_transaction_queue_size--;  
+          
+          slv_scb_transaction.get_data(slv_data);
+
+          $write("DATA[");
+          foreach(slv_data[key]) $write("%X", slv_data[key]);
+          $write("]\n");
+          
+          if (slv_data == mst_data) begin
             $display("SUCCESS: Master VIP against Slave VIP scoreboard Compare passed");
+          end
+          else begin
+            $display("XXXX: ERROR: ");
+            error_cnt++;
           end
           comparison_cnt++;
         end  
