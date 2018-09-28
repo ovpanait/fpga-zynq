@@ -241,7 +241,7 @@ module myip #
 	   stream_data_out <= stream_data_fifo[read_pointer];
 	   if (tx_en)
              begin
-		stream_data_out <= stream_data_fifo[read_pointer + 1];
+		stream_data_out <= stream_data_fifo[read_pointer + 1'b1];
 	     end
 	end
      end
