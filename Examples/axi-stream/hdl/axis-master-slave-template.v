@@ -98,12 +98,9 @@ module myip #
    // AXI Stream internal signals
    //streaming data valid
    wire 	     axis_tvalid;
-   //streaming data valid delayed by one clock cycle
-   reg 		     axis_tvalid_delay;
    //Last of the streaming data
    wire 	     axis_tlast;
-   //Last of the streaming data delayed by one clock cycle
-   reg 		     axis_tlast_delay;
+
    //FIFO implementation signals
    reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out;
    wire 			    tx_en;
@@ -202,30 +199,7 @@ module myip #
     * Master side logic
     */
 
-   // AXI tlast generation
-   // axis_tlast is asserted number of output streaming data is NUMBER_OF_OUTPUT_WORDS-1
-   // (0 to NUMBER_OF_OUTPUT_WORDS-1)
    assign axis_tlast = (read_pointer == NUMBER_OF_OUTPUT_WORDS-1);
-
-   // Delay the axis_tvalid and axis_tlast signal by one clock cycle
-   // to match the latency of M_AXIS_TDATA
-   always @(posedge M_AXIS_ACLK)
-     begin
-	axis_tvalid_delay <= 1'b0;
-	axis_tlast_delay <= 1'b0;
-	
-	if (!M_AXIS_ARESETN)
-	  begin
-	     axis_tvalid_delay <= 1'b0;
-	     axis_tlast_delay <= 1'b0;
-	  end
-	else if (tx_en)
-	  begin
-	     axis_tvalid_delay <= axis_tvalid;
-	     axis_tlast_delay <= axis_tlast;
-	  end
-     end
-
    assign axis_tvalid = (mst_exec_state == MASTER_SEND) && !tx_done;
    
    //read_pointer pointer
