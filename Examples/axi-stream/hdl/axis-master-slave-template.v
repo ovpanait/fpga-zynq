@@ -117,8 +117,6 @@ module myip #
    genvar 			    byte_index;
    // FIFO write enable
    wire 			    fifo_wren;
-   // FIFO full flag
-   reg 				    fifo_full_flag;
    // FIFO write pointer
    reg [bit_num-1:0] 		    write_pointer;
    // sink has accepted all the streaming data and stored in FIFO
@@ -307,7 +305,6 @@ module myip #
      end
 
    wire not_equal;
-   reg 	reads_done;
    reg 	processing_done;
    wire start_processing;
 
