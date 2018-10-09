@@ -304,36 +304,9 @@ module myip #
           end
      end
 
-   wire not_equal;
    reg 	processing_done;
    wire start_processing;
 
    assign start_processing = (mst_exec_state == PROCESS_STUFF) && !processing_done;
-
-   assign not_equal =  (stream_data_fifo[0] ^
-                        stream_data_fifo[1] ^
-                        stream_data_fifo[2] ^
-                        stream_data_fifo[3] ^
-                        stream_data_fifo[4] ^
-                        stream_data_fifo[5] ^
-                        stream_data_fifo[6] ^
-                        stream_data_fifo[7]) ? 1 :0; // hardcode this shit
-
-   // Processing routine
-   always @(posedge S_AXIS_ACLK)
-     begin
-        processing_done <= 1'b0;
-
-        if (start_processing)
-          begin
-             if (not_equal)
-               led <= 4'b0011;
-             else
-               led <= 4'b1100;
-
-             processing_done <= 1'b1;
-          end
-     end
-
 
 endmodule
