@@ -309,4 +309,19 @@ module myip #
 
    assign start_processing = (mst_exec_state == PROCESS_STUFF) && !processing_done;
 
+   /* Bitcoin Hasher processing logic */
+   sha_top SHA(
+	       .clk(clk),
+	       .reset(reset),
+	       .en(sha_en),
+
+	       .prev_blk(prev_blk),
+	       .prev_H(first_stage_hash),
+	       .input_M(input_M),
+
+	       .nonce(nonce),
+	       .winner_H(output_H),
+	       .found(sha_found),
+	       .done(sha_done)
+	       );
 endmodule

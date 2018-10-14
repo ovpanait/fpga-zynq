@@ -1,10 +1,15 @@
 `ifndef sha_vh
  `define sha_vh
 
- `define WORD_S 32
-
  `define W_SIZE 32
  `define W_MAX (`W_SIZE - 1)
+
+/* Bitcoin header components sizes  */
+ `define VERSION_S (`W_SIZE)
+ `define TIME_S (`W_SIZE)
+ `define NBITS_S (`W_SIZE)
+
+ `define WORD_S 32
 
  `define DELAY 32
 
