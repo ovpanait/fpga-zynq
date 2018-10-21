@@ -11,7 +11,7 @@ import axi4stream_vip_pkg::*;
 import ex_sim_axi4stream_vip_mst_0_pkg::*;
 import ex_sim_axi4stream_vip_0_0_pkg::*;
 
-module axi4stream_vip_0_exdes_tb(
+module tb_main(
   );
 
   // Error count to check how many comparison failed
