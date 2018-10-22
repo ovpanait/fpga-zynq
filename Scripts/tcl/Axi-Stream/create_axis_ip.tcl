@@ -5,8 +5,8 @@ set ip_path "[pwd]/ip_repo/$ip_name"
 file mkdir "[pwd]/ip_repo"
 
 create_project -part xc7z020clg400-1 $ip_name $ip_path
-create_peripheral user.org user $ip_name 1.0 -dir $ip_path
 
+create_peripheral user.org user $ip_name 1.0 -dir $ip_path
 add_peripheral_interface S00_AXIS -interface_mode slave -axi_type stream [ipx::find_open_core user.org:user:$ip_name:1.0]
 add_peripheral_interface M00_AXIS -interface_mode master -axi_type stream [ipx::find_open_core user.org:user:$ip_name:1.0]
 generate_peripheral [ipx::find_open_core user.org:user:$ip_name:1.0]
