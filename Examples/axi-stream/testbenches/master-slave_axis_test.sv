@@ -8,8 +8,8 @@
 `timescale 1ns / 1ps
 
 import axi4stream_vip_pkg::*;
-import ex_sim_axi4stream_vip_mst_0_pkg::*;
-import ex_sim_axi4stream_vip_0_0_pkg::*;
+import design_1_axi4stream_vip_0_0_pkg::*;
+import design_1_axi4stream_vip_1_0_pkg::*;
 
 module tb_main(
   );
@@ -41,8 +41,8 @@ module tb_main(
   // Slave VIP agent verbosity level
   xil_axi4stream_uint                           slv_agent_verbosity = 0;
 
-  ex_sim_axi4stream_vip_mst_0_mst_t                              mst_agent;
-  ex_sim_axi4stream_vip_0_0_slv_t                              slv_agent;
+  design_1_axi4stream_vip_0_0_mst_t                              mst_agent;
+  design_1_axi4stream_vip_1_0_slv_t                              slv_agent;
 
   // Clock signal
   bit                                     clock;
@@ -50,10 +50,9 @@ module tb_main(
   bit                                     reset;
 
   // instantiate bd
-  chip DUT(
-      .aresetn(reset),
-  
-    .aclk(clock)
+  design_1_wrapper DUT(
+		.aresetn(reset),
+		.aclk(clock)
   );
 
   always #10 clock <= ~clock;
@@ -70,8 +69,8 @@ module tb_main(
     mst_monitor_transaction = new("master monitor transaction");
     slv_monitor_transaction = new("slave monitor transaction");
 
-    mst_agent = new("master vip agent",DUT.ex_design.axi4stream_vip_mst.inst.IF);
-    slv_agent = new("slave vip agent",DUT.ex_design.axi4stream_vip_slv.inst.IF);
+    mst_agent = new("master vip agent",DUT.design_1_i.axi4stream_vip_0.inst.IF);
+    slv_agent = new("slave vip agent",DUT.design_1_i.axi4stream_vip_1.inst.IF);
     $timeformat (-12, 1, " ps", 1);
     
     mst_agent.vif_proxy.set_dummy_drive_type(XIL_AXI4STREAM_VIF_DRIVE_NONE);
