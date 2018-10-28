@@ -88,6 +88,46 @@ module tb_main();
 	 tester #(256)::verify_output(bitcoin_blk, `BITCOIN_BLK);
 	 $display("bitcoin block: %h", bitcoin_blk);
       end
+      @(negedge clk)
+	 tester #(1)::verify_output(bitcoin_done, 1'b0);
+      
+      @(negedge clk) reset = 1;
+      
+      /*
+       * TEST 2
+       */
+
+       // Test 1
+      $display("Begin testing scenario 2...");
+
+      // Testcase init
+      wait(reset)
+	@(posedge clk);
+      @(negedge clk) reset = 0;
+
+      // Testcase
+      @(negedge clk) begin
+	 start = 1'b1;
+	 blk_version = `BLK_VERSION;
+	 prev_blk_header_hash = `PREV_BLK_HEADER_HASH;
+	 merkle_root_hash = `MERKLE_ROOT_HASH;
+	 blk_time = `BLK_TIME;
+	 blk_nbits = `BLK_NBITS;
+	 blk_nonce = `BLK_NONCE;
+      end
+
+      // Test output for 1st input
+      //repeat(128) @(posedge clk);
+      @(posedge bitcoin_done);
+      @(negedge clk) begin
+	 tester #(256)::verify_output(bitcoin_blk, `BITCOIN_BLK);
+	 $display("bitcoin block: %h", bitcoin_blk);
+      end
+      @(negedge clk)
+	 tester #(1)::verify_output(bitcoin_done, 1'b0);
+      
+      @(negedge clk) reset = 1;
+      
       
       $display("\nSimulation completed with %d errors\n", errors);
       $stop;
