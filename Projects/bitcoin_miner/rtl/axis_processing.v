@@ -1,5 +1,3 @@
-`timescale 1 ns / 1 ps
-
 `include "sha.vh"
 
 module test_ip #
@@ -98,14 +96,13 @@ module test_ip #
    reg [bit_num-1:0] read_pointer;
 
    // AXI Stream internal signals
-   //streaming data valid
    wire 	     axis_tvalid;
-   //Last of the streaming data
    wire 	     axis_tlast;
 
-   //FIFO implementation signals
-   reg [C_M_AXIS_TDATA_WIDTH-1 : 0] out_stream_data_fifo [0 : NUMBER_OF_OUTPUT_WORDS - 1];
+   reg 		     axis_tvalid_delay;
+   reg 		     axis_tlast_delay;
    
+   reg [C_M_AXIS_TDATA_WIDTH-1 : 0] out_stream_data_fifo [0 : NUMBER_OF_OUTPUT_WORDS - 1];
    reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out;
    wire 			    tx_en;
    //The master has issued all the streaming data stored in FIFO
@@ -126,22 +123,8 @@ module test_ip #
    // sink has accepted all the streaming data and stored in FIFO
    reg 				    writes_done;
 
-   // =====================================================================
-
-   /*
-    * Master side I/O Connections assignments
-    */
-   assign m00_axis_tvalid	= axis_tvalid;
-   assign m00_axis_tdata	= stream_data_out;
-   assign m00_axis_tlast	= axis_tlast;
-   assign m00_axis_tstrb	= {(C_M_AXIS_TDATA_WIDTH/8){1'b1}};
-
-   /*
-    * Slave side I/O Connections assignments
-    */
-   assign s00_axis_tready	= axis_tready;
-
-   // =====================================================================
+   reg 				    processing_done;
+   wire 			    start_processing;
 
    // Control state machine implementation
    always @(posedge s00_axis_aclk)
@@ -201,12 +184,18 @@ module test_ip #
     * Master side logic
     */
 
+   /*
+    * Master side I/O Connections assignments
+    */
+   assign m00_axis_tvalid	= axis_tvalid;
+   assign m00_axis_tdata	= stream_data_out;
+   assign m00_axis_tlast	= axis_tlast;
+   assign m00_axis_tstrb	= {(C_M_AXIS_TDATA_WIDTH/8){1'b1}};
+
    assign axis_tlast = (read_pointer == NUMBER_OF_OUTPUT_WORDS-1);
    assign axis_tvalid = (mst_exec_state == MASTER_SEND) && !tx_done;
-   
-   //read_pointer pointer
 
-   always@(posedge m00_axis_aclk)
+   always @(posedge m00_axis_aclk)
      begin
 	if(!m00_axis_aresetn)
 	  begin
@@ -225,13 +214,12 @@ module test_ip #
 		  end
 		else
 		  begin
-		     read_pointer <= read_pointer + 1;
+		     read_pointer <= read_pointer + 1'b1;
 		     tx_done <= 1'b0;
 		  end
 	     end // if (tx_en)
 	end
      end
-   //FIFO read enable generation
 
    assign tx_en = m00_axis_tready && axis_tvalid;
 
@@ -256,10 +244,11 @@ module test_ip #
     * Slave side logic
     */
 
-   // AXI Streaming Sink
-   //
-   // The example design sink is always ready to accept the s00_axis_tdata  until
-   // the FIFO is not filled with NUMBER_OF_INPUT_WORDS number of input words.
+   /*
+    * Slave side I/O Connections assignments
+    */
+   assign s00_axis_tready	= axis_tready;
+   
    assign axis_tready = ((mst_exec_state == WRITE_FIFO) && !writes_done);
 
    always@(posedge s00_axis_aclk)
@@ -292,13 +281,9 @@ module test_ip #
 	  end
      end
 
-   // FIFO write enable generation
    assign fifo_wren = s00_axis_tvalid && axis_tready;
 
-   // FIFO Implementation
-
    reg  [C_S_AXIS_TDATA_WIDTH-1:0] in_stream_data_fifo [0 : NUMBER_OF_INPUT_WORDS-1];
-   // Streaming input data is stored in FIFO
 
    always @(posedge s00_axis_aclk)
      begin
@@ -307,9 +292,6 @@ module test_ip #
              in_stream_data_fifo[write_pointer] <= s00_axis_tdata;
           end
      end
-
-   wire 	processing_done;
-   wire 	start_processing;
 
    assign start_processing = (mst_exec_state == PROCESS_STUFF) && !processing_done;
 
@@ -324,8 +306,8 @@ module test_ip #
 
    wire [`H_SIZE-1:0] 	 bitcoin_blk;
    wire [`WORD_S-1:0] 	 bitcoin_nonce;
-   //   wire 		 bitcoin_done;
-
+   wire 		 bitcoin_done;
+   
    // Map in_stream_data_fifo to bitcoin_block inputs
    assign blk_version = in_stream_data_fifo[0];
    assign prev_blk_header_hash = {
@@ -355,13 +337,17 @@ module test_ip #
    // Map out_stream_data_fifo to bitcoin_block outputs
    genvar 		 j; //This is our generate loop variable.
    generate for (j = 0; j < 8; j=j+1) begin
-      assign bitcoin_blk[j*32 +: 32] = out_stream_data_fifo[8 - 1 - j]; //FIXME     
+      always @(posedge s00_axis_aclk) begin
+	 if (bitcoin_done == 1'b1) begin
+	    out_stream_data_fifo[8 - 1 - j] <=  bitcoin_blk[j*32 +: 32];
+	 end
+      end
    end
    endgenerate
    
    bitcoin_block miner(
 		       .clk(s00_axis_aclk),
-		       .reset(s00_axis_aresetn),
+		       .reset(!s00_axis_aresetn),
 		       .start(start_processing),
 
     		       .blk_version(blk_version),
@@ -373,6 +359,11 @@ module test_ip #
 
 		       .bitcoin_blk(bitcoin_blk),
 		       .bitcoin_nonce(bitcoin_nonce),
-		       .bitcoin_done(processing_done)
+		       .bitcoin_done(bitcoin_done)
 		       );
+
+   always @(posedge s00_axis_aclk)
+     begin
+	processing_done <= bitcoin_done;
+     end
 endmodule

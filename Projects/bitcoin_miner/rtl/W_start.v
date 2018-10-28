@@ -38,7 +38,7 @@ module W_start (
      begin
 	en_next <= 0;
 
-	if (reset == 1) begin
+	if (reset == 1'b1) begin
 		en_next <= 0;
 		W <= {`WARR_S{1'b0}};
 		H <= {`H_SIZE{1'b0}};
