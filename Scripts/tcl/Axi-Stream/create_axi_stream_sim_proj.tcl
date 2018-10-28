@@ -64,9 +64,9 @@ export_ip_user_files -of_objects [get_files $proj_path/[set proj_name].srcs/sour
 create_ip_run [get_files -of_objects [get_fileset sources_1] [get_files $proj_path/[set proj_name].srcs/sources_1/bd/design_1/design_1.bd]]
 launch_runs -jobs 8 {design_1_axi4stream_vip_0_0_synth_1 design_1_axi4stream_vip_1_0_synth_1}
 
-# SImulation
+# Simulation
 set_property SOURCE_SET sources_1 [get_filesets sim_1]
-add_files -fileset [get_filesets sim_1] -norecurse [pwd]/Tb/master-slave_axis_test.sv
+add_files -fileset [get_filesets sim_1] -norecurse [pwd]/Tb/tb_main.sv
 
 foreach ip [get_ips] {
 	add_files -fileset [get_filesets sim_1] [get_files -compile_order sources -used_in simulation -of [get_files [set ip].xci]]
@@ -78,12 +78,17 @@ set_property top_lib xil_defaultlib [get_filesets sim_1]
 
 get_files -compile_order sources -used_in simulation
 
+set outputDir ./outputs
+file mkdir $outputDir
+
 export_simulation \
-	-directory export_sim \
-	-simulator xsim \
-	-ip_user_files_dir $proj_path/[set proj_name].ip_user_files \
-	-ipstatic_source_dir $proj_path/[set proj_name].ip_user_files/ipstatic \
-	-use_ip_compiled_libs -force 
+    -simulator xsim \
+    -ip_user_files_dir $proj_path/[set proj_name].ip_user_files \
+    -ipstatic_source_dir $proj_path/[set proj_name].ip_user_files/ipstatic \
+    -use_ip_compiled_libs \
+    -force \
+    -directory "$outputDir/export_sim" \
+    -include "$env(SIM_PATH)/include"
 
 close_project
 exit

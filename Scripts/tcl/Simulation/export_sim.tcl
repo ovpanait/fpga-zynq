@@ -1,12 +1,16 @@
+read_verilog  [ glob ./Sources/*.v ]
+read_verilog [ glob ./Tb/*.sv ]
+read_xdc [ glob -nocomplain ./Constraints/*.xdc ] -quiet
+
+set_property top tb_main [current_fileset -simset]
+
 set outputDir ./outputs
 file mkdir $outputDir
 
-read_verilog  [ glob ./Sources/*.v ]
-read_verilog [ glob ./Tb/*.sv ]
-read_xdc [ glob ./Constraints/*.xdc ]
+export_simulation \
+    -force \
+    -simulator xsim \
+    -directory "$outputDir/export_sim" \
+    -include "$env(SIM_PATH)/include"
 
-set_property top tb_main [current_fileset -simset]
-#set_property include_dirs ./include [current_fileset -simset]
-
-export_simulation -force -simulator xsim -directory "$outputDir/export_sim" -include "$env(SIM_PATH)/include"
 exit
