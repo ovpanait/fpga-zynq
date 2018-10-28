@@ -144,7 +144,7 @@ module tb_main(
    initial begin
       forever begin
 	 wait (master_moniter_transaction_queue_size>0 ) begin
-            xil_axi4stream_data_byte mst_data [3:0];
+            xil_axi4stream_data_byte mst_data [0:3];
             mst_scb_transaction = master_moniter_transaction_queue.pop_front;
             master_moniter_transaction_queue_size--;
             
@@ -164,14 +164,6 @@ module tb_main(
 	    slv_scb_transaction.get_data(slv_data);
 	    print_data("Received slave data: ", slv_data);
 	    
-	    
-	    //	    if (slv_data == mst_data) begin
-	    //	       $display("SUCCESS: Master VIP against Slave VIP scoreboard Compare passed");
-	    //	    end
-	    //	    else begin
-	    //	       $display("XXXX: ERROR: ");
-	    //	       error_cnt++;
-	    //	    end
 	    comparison_cnt++;
          end  
       end
@@ -207,14 +199,15 @@ function print_miner();
    end
 endfunction
 
-function print_data(string msg, xil_axi4stream_data_byte data[3:0]);
+function print_data(string msg, xil_axi4stream_data_byte data[0:3]);
    begin
       $write({msg, " "});
-      
-      $write("DATA[0x");
-      foreach(data[key]) 
-	$write("%X", data[key]);
-      $write("]\n");
+
+      $write("0x");
+      for(int i = $size(data) - 1; i >= 0; i--) begin
+	 $write("%H", data[i]);
+      end
+      $display("");
    end
 endfunction // print_data   
 endmodule
