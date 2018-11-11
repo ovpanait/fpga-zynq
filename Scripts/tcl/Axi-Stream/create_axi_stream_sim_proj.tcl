@@ -88,7 +88,7 @@ export_simulation \
     -use_ip_compiled_libs \
     -force \
     -directory "$outputDir/export_sim" \
-    -include "$env(SIM_PATH)/include"
+    -include "$env(INCLUDE_DIR)"
 
 close_project
 exit
