@@ -179,7 +179,7 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 			//printf("W[t - 7]: %08X\n", W[t - 7]);
 			//printf("sig0(W[t - 15]):%08X\n", sig0(W[t - 15]));
 			//printf("W[t - 16]: %08X\n", W[t - 16]);
-			printf("W[%u]: %08X\n", t + 1, W[t]);
+			printf("W[%u]: %08X\n", t, W[t]);
 			#endif
 		}
 
@@ -195,7 +195,7 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 		// Fully unrolled
 		/* 64 rounds */
 		for (t = 0; t < 64; ++t) {
-			#ifdef DEBUG
+			#ifdef DDEBUG
 			printf("Hash[%u] - In\n", t);
 			printf("%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n\n",
 				a, b, c, d, e, f, g, h);
@@ -212,7 +212,7 @@ void sha256_compute(struct sha256_data *co, char *i_msg)
 			b = a;
 			a = T1 + T2;
 
-			#ifdef DEBUG
+			#ifdef DDEBUG
 			printf("Hash[%u] - Out\n", t);
 			printf("%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n%08X \n\n",
 				a, b, c, d, e, f, g, h);
