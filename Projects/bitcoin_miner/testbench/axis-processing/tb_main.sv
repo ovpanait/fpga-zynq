@@ -204,7 +204,7 @@ module tb_main(
    end // initial begin
 
    /* ******************** */
-`define  miner  DUT.design_1_i.test_ip_0.inst.miner
+`define  miner  DUT.design_1_i.test_ip_0.inst.test_miner.miner
 
    always @(posedge `miner.start or negedge `miner.start) begin
       $display("`miner.start changed: %H", `miner.start);

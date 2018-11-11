@@ -82,7 +82,7 @@ module test_ip #
    reg 		     axis_tvalid_delay;
    reg 		     axis_tlast_delay;
    
-   reg [C_M_AXIS_TDATA_WIDTH-1 : 0] out_stream_data_fifo [0 : NUMBER_OF_OUTPUT_WORDS - 1];
+   wire [C_M_AXIS_TDATA_WIDTH-1 : 0] out_stream_data_fifo [0 : NUMBER_OF_OUTPUT_WORDS - 1];
    reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out;
    wire 			    tx_en;
 
@@ -98,7 +98,7 @@ module test_ip #
    reg [bit_num-1:0] 		    write_pointer;
    reg 				    writes_done;
 
-   reg 				    processing_done;
+   wire 				    processing_done;
    wire 			    start_processing;
 
    // Control state machine implementation
@@ -265,75 +265,31 @@ module test_ip #
 
    assign start_processing = (mst_exec_state == PROCESS_STUFF) && !processing_done;
 
-   /* Bitcoin miner logic */
-   wire [`VERSION_S-1:0] blk_version;
-   wire [`H_SIZE-1:0] 	 prev_blk_header_hash;
-   wire [`H_SIZE-1:0] 	 merkle_root_hash;
-   wire [`TIME_S-1:0] 	 blk_time;
-   wire [`NBITS_S-1:0] 	 blk_nbits;
-   wire [`WORD_S-1:0] 	 blk_nonce;
-   
 
-   wire [`H_SIZE-1:0] 	 bitcoin_blk;
-   wire [`WORD_S-1:0] 	 bitcoin_nonce;
-   wire 		 bitcoin_done;
+   wire [(NUMBER_OF_INPUT_WORDS*C_S_AXIS_TDATA_WIDTH)-1:0]   in_fifo; 
+   wire [(NUMBER_OF_OUTPUT_WORDS*C_S_AXIS_TDATA_WIDTH)-1:0] out_fifo;
    
-   // Map in_stream_data_fifo to bitcoin_block inputs
-   assign blk_version = in_stream_data_fifo[0];
-   assign prev_blk_header_hash = {
-				  in_stream_data_fifo[1],
-				  in_stream_data_fifo[2],
-				  in_stream_data_fifo[3],
-				  in_stream_data_fifo[4],
-				  in_stream_data_fifo[5],
-				  in_stream_data_fifo[6],
-				  in_stream_data_fifo[7],
-				  in_stream_data_fifo[8]
-				  };
-   assign merkle_root_hash = {
-			      in_stream_data_fifo[9],
-			      in_stream_data_fifo[10],
-			      in_stream_data_fifo[11],
-			      in_stream_data_fifo[12],
-			      in_stream_data_fifo[13],
-			      in_stream_data_fifo[14],
-			      in_stream_data_fifo[15],
-			      in_stream_data_fifo[16]
-			      };
-   assign blk_time = in_stream_data_fifo[17];
-   assign blk_nbits = in_stream_data_fifo[18];
-   assign blk_nonce = in_stream_data_fifo[19];
-   
-   // Map out_stream_data_fifo to bitcoin_block outputs
-   genvar 		 j;
-   generate for (j = 0; j < 8; j=j+1) begin
-      always @(posedge s00_axis_aclk) begin
-	 if (bitcoin_done == 1'b1) begin
-	    out_stream_data_fifo[8 - 1 - j] <=  bitcoin_blk[j*32 +: 32];
-	 end
-      end
+   // Map in_stream_data_fifo to in_fifo
+   genvar 						   j;
+   generate for (j = 0; j < NUMBER_OF_INPUT_WORDS; j=j+1) begin
+      assign in_fifo[j*C_S_AXIS_TDATA_WIDTH +: C_S_AXIS_TDATA_WIDTH] = in_stream_data_fifo[j];
    end
    endgenerate
-   
-   bitcoin_block miner(
-		       .clk(s00_axis_aclk),
-		       .reset(!s00_axis_aresetn),
-		       .start(start_processing),
 
-    		       .blk_version(blk_version),
-		       .prev_blk_header_hash(prev_blk_header_hash),
-		       .merkle_root_hash(merkle_root_hash),
-		       .blk_time(blk_time),
-		       .blk_nbits(blk_nbits),
-		       .blk_nonce(blk_nonce),
+   // Map out_stream_data_fifo to out_fifo
+   generate for (j = 0; j < NUMBER_OF_OUTPUT_WORDS; j=j+1) begin
+      assign out_stream_data_fifo[j] = out_fifo[j*C_S_AXIS_TDATA_WIDTH +: C_S_AXIS_TDATA_WIDTH];
+   end
+   endgenerate
+ 
+   axis_bitcoin_miner test_miner(
+			    .clk(s00_axis_aclk),
+			    .reset(!s00_axis_aresetn),
+			    .en(start_processing),
 
-		       .bitcoin_blk(bitcoin_blk),
-		       .bitcoin_nonce(bitcoin_nonce),
-		       .bitcoin_done(bitcoin_done)
-		       );
-
-   always @(posedge s00_axis_aclk)
-     begin
-	processing_done <= bitcoin_done;
-     end
+			    .in_fifo(in_fifo),
+			    .out_fifo(out_fifo),
+			    .done(processing_done)
+			    );
+   			    
 endmodule
