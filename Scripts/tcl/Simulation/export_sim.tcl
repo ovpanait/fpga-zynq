@@ -11,6 +11,6 @@ export_simulation \
     -force \
     -simulator xsim \
     -directory "$outputDir/export_sim" \
-    -include "$env(SIM_PATH)/include"
+    -include "$env(INCLUDE_DIR)"
 
 exit
