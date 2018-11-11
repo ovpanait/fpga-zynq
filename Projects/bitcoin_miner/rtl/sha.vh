@@ -11,15 +11,15 @@
 
  `define WORD_S 32
 
- `define DELAY 32
+ `define DELAY 48
 
  `define BLK_SIZE 512
 
  `define MSG_S 512
  `define MSG_BLKCNT (`MSG_S / `WORD_S)
 
- `define WARR_S `DELAY * `WORD_S
- `define W_BLKCNT `DELAY
+ `define WARR_S 16 * `WORD_S
+ `define W_BLKCNT 16
 
  `define H_SIZE `WORD_S * 8
  `define H_BLKCNT 8
