@@ -29,6 +29,10 @@ update_compile_order -fileset [current_fileset]
 ipx::merge_project_changes files [ipx::current_core]
 ipx::merge_project_changes hdl_parameters [ipx::current_core]
 
+# Check for syntax errors
+# If we don't do this here, it will generate subtle errors when running simulation
+synth_design -rtl
+
 #launch_runs synth_1 -jobs 8
 #wait_on_run synth_1
 
