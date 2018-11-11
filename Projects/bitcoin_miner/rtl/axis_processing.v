@@ -17,9 +17,6 @@ module test_ip #
    parameter integer C_S_AXIS_TDATA_WIDTH = 32
    )
    (
-    output reg [3:0] 				 led,
-
-
     /*
      * Master side ports
      */
