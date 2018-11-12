@@ -97,16 +97,16 @@ module tb_main();
       // Test output for 1st input
       @(posedge en_o);
       @(negedge clk) begin
-//	 tester #(32)::verify_output(DUT.abc_tmp[64/16][0], 32'b0);
-//	 tester #(32)::verify_output(DUT.abc_tmp[64/16][1], 32'b0);
-//	 tester #(32)::verify_output(DUT.abc_tmp[64/16][2], 32'b0);
-//	 tester #(32)::verify_output(DUT.abc_tmp[64/16][3], 32'b0);
-//	 tester #(32)::verify_output(DUT.abc_tmp[64/16][4], 32'b0);
-//	 tester #(32)::verify_output(DUT.abc_tmp[64/16][5], 32'b0);
-//	 tester #(32)::verify_output(DUT.abc_tmp[64/16][6], 32'b0);
-//	 tester #(32)::verify_output(DUT.abc_tmp[64/16][7], 32'b0);
+	 tester #(32)::verify_output(DUT.abc_tmp[0][0], 32'b0);
+	 tester #(32)::verify_output(DUT.abc_tmp[0][1], 32'b0);
+	 tester #(32)::verify_output(DUT.abc_tmp[0][2], 32'b0);
+	 tester #(32)::verify_output(DUT.abc_tmp[0][3], 32'b0);
+	 tester #(32)::verify_output(DUT.abc_tmp[0][4], 32'b0);
+	 tester #(32)::verify_output(DUT.abc_tmp[0][5], 32'b0);
+	 tester #(32)::verify_output(DUT.abc_tmp[0][6], 32'b0);
+         tester #(32)::verify_output(DUT.abc_tmp[0][7], 32'b0);
 //
-//	 $display("xxx: %H", H);
+	 $display("xxx: %H", DUT.H_tmp[0]);
 	 
 	 tester #(1)::verify_output(en_o, 1'b1);
 	 tester #($size(H))::verify_output(H, `T1_H1);

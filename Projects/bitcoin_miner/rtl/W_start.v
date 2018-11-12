@@ -6,7 +6,7 @@ module W_start (
 		input 			 en,
 
 		input [`WORD_S-1:0] 	 nonce,
-		input [`MSG_S-1:0] 	 M,
+		input [`WARR_S-1:0] 	 W_in,
 		input [`H_SIZE-1:0] 	 Hin,
 
 		output reg [`WORD_S-1:0] nonce_out,
@@ -15,35 +15,8 @@ module W_start (
 		output reg 		 en_next
 		);
 
-   wire [`WORD_S-1:0] 			 Min_arr[`MSG_BLKCNT - 1:0];
-   wire [`WORD_S-1:0] 			 W_arr[`W_BLKCNT-1:0];
-
    reg [4:0] 				 cnt = 5'h0;
 
-   genvar 				 i;
-
-   generate
-      for (i=0; i < `MSG_BLKCNT; i=i+1) begin : M_ARR
-	 assign Min_arr[i] = M[(`MSG_BLKCNT - i)*`WORD_S - 1 : (`MSG_BLKCNT - i - 1)*`WORD_S];
-      end
-   endgenerate
-
-   generate
-      for (i=0; i < `W_BLKCNT; i=i+1) begin : W_ARR
-	 assign  W_arr[i] = W[i*32 +: `W_SIZE];
-      end
-   endgenerate
-
-   generate
-      for (i=0; i < `W_BLKCNT; i=i+1) begin
-	 always @(posedge clk)
-	   begin
-	      if (en == 1'b1)
-		W[i*32 +: `WORD_S] <= Min_arr[i];
-	   end
-      end
-   endgenerate
-   
    always @(posedge clk)
      begin
 	en_next <= 1'b0;
@@ -53,10 +26,18 @@ module W_start (
 	   H <= {`H_SIZE{1'b0}};
 	   nonce_out <= {`WORD_S{1'b0}};
 	end
-	else if (en == 1'b1) begin
-	   H <= Hin;
-	   nonce_out <= nonce;
-	   en_next <= 1'b1;
+	else begin
+	   if ((en == 1'b1) || (en == 1'b0 && cnt != 5'b0)) begin
+	      cnt <= cnt + 1'b1;
+	   end
+	   
+	   if (cnt == (`DELAY-1))
+	     begin
+		W <= W_in;
+		H <= Hin;
+		nonce_out <= nonce;
+		en_next <= 1'b1;
+	     end
 	end
      end
 endmodule

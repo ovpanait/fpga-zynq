@@ -7,7 +7,7 @@ module tb_main();
    reg clk;
    reg reset;
    reg en;
-   reg [511:0] M;
+   reg [511:0] W_in;
    wire [511:0] W;
    wire 	en_out;
 
@@ -15,7 +15,7 @@ module tb_main();
 		.clk(clk),
 		.reset(reset),
 		.en(en),
-		.M(M),
+		.W_in(W_in),
 
 		.W(W),
 		.en_next(en_out)
@@ -58,12 +58,14 @@ module tb_main();
       // Testcase
       @(negedge clk) begin
 	 en = 1'b1;
-	 M = `T1_M1;
+	 W_in = `T1_M1;
       end
 
       @(posedge en_out);
       @(negedge clk) begin
-	 tester #($size(W))::verify_output(W, `T1_WRES1);
+	 $display("xxx: %H", W);
+	 
+	 tester #($size(W))::verify_output(W, `T1_M1);
 	 en = 1'b0;
       end
 

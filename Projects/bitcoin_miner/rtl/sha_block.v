@@ -15,9 +15,9 @@ module sha_block(
 		 output 	      en_next
 		 );
 
-   wire [`WARR_S-1:0] 		      W[48/`DELAY:0];
-   wire 			      en_o[48/`DELAY + 64/`DELAY:0];
-   wire [`WORD_S-1:0] 		      nonce_tmp[48/`DELAY + 64/`DELAY:0];
+   wire [`WARR_S-1:0] 		      W[64/`DELAY+1:0];
+   wire 			      en_o[2*64/`DELAY:0];
+   wire [`WORD_S-1:0] 		      nonce_tmp[2*64/`DELAY:0];
 
    wire [`H_SIZE-1:0] 		      H_tmp[64/`DELAY:0];
    wire [`WORD_S-1:0] 		      tmp[64/`DELAY:0];
@@ -26,22 +26,39 @@ module sha_block(
    genvar 			      i;
    
    // W
-   W_start w_b(
+   generate
+      for (i = 0; i < `WARR_S / `W_SIZE; i=i+1) begin
+	 assign W[0][i*`W_SIZE +: `W_SIZE] = M[`WARR_S - i*`W_SIZE +: `W_SIZE]; 
+      end
+   endgenerate
+
+   generate
+      for (i = 0; i < `H_SIZE / `W_SIZE; i=i+1) begin
+	 assign H_tmp[0][i*`W_SIZE +: `W_SIZE] = H_prev[i*`W_SIZE +: `W_SIZE]; 
+      end
+   endgenerate
+
+   assign en_o[0] = en;
+   generate
+      for (i = 0; i < 16 / `DELAY; i=i+1) begin : M_to_W
+	    W_start w_b(
 	       .clk(clk),
 	       .reset(reset),
 	       .en(en),
 
-	       .nonce(nonce),
-	       .M(M),
-	       .Hin(H_prev),
+	       .nonce(nonce_tmp[i]),
+	       .W_in(W[i]),
+	       .Hin(H_tmp[i]),
 
-	       .nonce_out(nonce_tmp[0]),
-	       .W(W[0]),
-	       .H(H_tmp[0]),
-	       .en_next(en_o[0]));
+	       .nonce_out(nonce_tmp[i+1]),
+	       .W(W[i+1]),
+	       .H(H_tmp[i+1]),
+	       .en_next(en_o[i+1]));
+      end
+   endgenerate
 
    generate
-      for (i = 0; i < 48/`DELAY; i=i+1) begin : middle_layers
+      for (i = 16/`DELAY; i < 64/`DELAY; i=i+1) begin : middle_layers
 	 W_middle w_e(
 		      .clk(clk),
 		      .reset(reset),
@@ -56,7 +73,7 @@ module sha_block(
    // SHA ROUNDS
    generate
       for (i = 0; i < 8; i=i+1) begin
-	 assign  abc_tmp[0][7 - i] = H_tmp[0][i*`W_SIZE +: `W_SIZE]; // shit
+	 assign  abc_tmp[0][7 - i] = H_tmp[16/`DELAY][i*`W_SIZE +: `W_SIZE]; // shit
       end
    endgenerate
    
@@ -76,7 +93,7 @@ module sha_block(
 			 .f(abc_tmp[i][5]),
 			 .g(abc_tmp[i][6]),
 			 .h(abc_tmp[i][7]),
-			 .Hin(H_tmp[i]),
+			 .Hin(H_tmp[i+1]),
 
 			 .nonce_out(nonce_tmp[i+1]),
 			 .K(K[i*(`DELAY*`W_SIZE) +: `DELAY*`W_SIZE]),
@@ -92,7 +109,7 @@ module sha_block(
 			 .h_next(abc_tmp[i+1][7]),
 			 .H(H_tmp[i+1]),
 
-			 .en_next(en_o[48/`DELAY + 1 + i])
+			 .en_next(en_o[64/`DELAY + 1 + i])
 			 );
       end
    endgenerate
@@ -100,10 +117,10 @@ module sha_block(
    sha_hash hash_out (
 		      .clk(clk),
 		      .reset(reset),
-		      .en(en_o[48/`DELAY + 64/`DELAY]),
+		      .en(en_o[2*64/`DELAY]),
 
 		      .H_i(H_tmp[64/`DELAY]),
-		      .nonce(48/`DELAY),
+		      .nonce(nonce_tmp[64/`DELAY]),
 
 		      .a(abc_tmp[64/`DELAY][0]),
 		      .b(abc_tmp[64/`DELAY][1]),
