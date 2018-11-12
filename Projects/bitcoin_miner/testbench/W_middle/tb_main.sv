@@ -43,8 +43,8 @@ module tb_main();
        // Inputs
 `define T1_Win1 512'h15a907c030cc0782b3d2bacefd456cd2f5bd2eab3513260d2cd900fc00000000000000008840290ac93b0c4ed1ca106527a51219f45dd1e9671d0e2f02000000
 
-      // Expected outputs for DELAY=48
-`define T1_WRES1 512'h4925b8fe36fe1c250f490962c7e983ff39e21b791fd5fdf2874db8ecc7f75380b1ab527855083d0ebf91b4256b7b1a5efee056a4dda5b9a890504f26ac50ee85
+      // Expected outputs for DELAY=16
+`define T1_WRES1 512'hcef23042773e4fe9d16ccc0f2759d27027a6cae51ddd458fb2ff0c9db3bfff3daf840f975dd99de0f9f4ecc2e8913345e57e7c442ac838a7f86712e5c3bcb098
 
       $display("Begin testing scenario 1...");
       $display("Testing W output and number of clock cycles... ");
@@ -65,9 +65,6 @@ module tb_main();
       @(negedge clk) begin
 	 tester #(1)::verify_output(en_out, 1'b1);
 	 tester #($size(W))::verify_output(W, `T1_WRES1);
-
-	 $finish;
-	 
       end
 
       @(negedge clk)
