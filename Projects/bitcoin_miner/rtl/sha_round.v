@@ -1,46 +1,47 @@
 `include "sha.vh"
 
-module sha_round #(parameter exit=0)
-(
-		    input 		  clk,
-		    input 		  reset,
-		    input 		  en,
+module sha_round
+  (
+   input 		      clk,
+   input 		      reset,
+   input 		      en,
 
-		    input [`W_MAX:0] 	  a,
-		    input [`W_MAX:0] 	  b,
-		    input [`W_MAX:0] 	  c,
-		    input [`W_MAX:0] 	  d,
-		    input [`W_MAX:0] 	  e,
-		    input [`W_MAX:0] 	  f,
-		    input [`W_MAX:0] 	  g,
-		    input [`W_MAX:0] 	  h,
+   input [`W_MAX:0] 	      a,
+   input [`W_MAX:0] 	      b,
+   input [`W_MAX:0] 	      c,
+   input [`W_MAX:0] 	      d,
+   input [`W_MAX:0] 	      e,
+   input [`W_MAX:0] 	      f,
+   input [`W_MAX:0] 	      g,
+   input [`W_MAX:0] 	      h,
 
-		    input [`WORD_S-1:0]	  nonce,
-		    input [`WARR_S-1:0]	  K,
-		    input [`WARR_S-1:0]	  W,
-		    input [`H_SIZE-1:0]	  Hin,
+   input [`WORD_S-1:0] 	      nonce,
+   input [`DELAY*`W_SIZE-1:0] K,
+   input [`WARR_S-1:0] 	      W,
+   input [`H_SIZE-1:0] 	      Hin,
 
-		    output reg [`W_MAX:0] a_next,
-		    output reg [`W_MAX:0] b_next,
-		    output reg [`W_MAX:0] c_next,
-		    output reg [`W_MAX:0] d_next,
-		    output reg [`W_MAX:0] e_next,
-		    output reg [`W_MAX:0] f_next,
-		    output reg [`W_MAX:0] g_next,
-		    output reg [`W_MAX:0] h_next,
+   output reg [`W_MAX:0]      a_next,
+   output reg [`W_MAX:0]      b_next,
+   output reg [`W_MAX:0]      c_next,
+   output reg [`W_MAX:0]      d_next,
+   output reg [`W_MAX:0]      e_next,
+   output reg [`W_MAX:0]      f_next,
+   output reg [`W_MAX:0]      g_next,
+   output reg [`W_MAX:0]      h_next,
 
-		    output reg [`WORD_S-1:0] nonce_out,
-		    output reg [`H_SIZE-1:0] H,
-		    output reg		  en_next);
+   output reg [`WORD_S-1:0]   nonce_out,
+   output reg [`H_SIZE-1:0]   H,
+   output reg 		      en_next
+   );
 
-   wire [`WORD_S-1:0] 		      W_arr[`W_BLKCNT-1:0];
-   wire [`WORD_S-1:0] 		      K_arr[`W_BLKCNT-1:0];
+   wire [`WORD_S-1:0] 	      W_arr[`W_BLKCNT-1:0];
+   wire [`WORD_S-1:0] 	      K_arr[`DELAY-1:0];
 
-   wire [`W_MAX:0] 			  T1_i, T2_i;
-   wire [`W_MAX:0] 			  T1_reg, T2_reg;
-   reg [4:0] 				  counter;
+   wire [`W_MAX:0] 	      T1_i, T2_i;
+   wire [`W_MAX:0] 	      T1_reg, T2_reg;
+   reg [4:0] 		      counter = 0;
 
-   genvar 			      i;
+   genvar 		      i;
 
    generate
       for (i=0; i < `W_BLKCNT; i=i+1) begin : WIN_ARR
@@ -49,7 +50,7 @@ module sha_round #(parameter exit=0)
    endgenerate
 
    generate
-      for (i=0; i < `W_BLKCNT; i=i+1) begin : KIN_ARR
+      for (i=0; i < `DELAY; i=i+1) begin : KIN_ARR
 	 assign  K_arr[i] = K[(i+1)*32 - 1:i*32];
       end
    endgenerate
@@ -83,8 +84,8 @@ module sha_round #(parameter exit=0)
 
 	   // Buffer for some values
 	   if (en == 1) begin
-		H <= Hin;
-		nonce_out <= nonce;
+	      H <= Hin;
+	      nonce_out <= nonce;
 	   end
 
 	   // Processing
@@ -99,10 +100,6 @@ module sha_round #(parameter exit=0)
 	      a_next <= T1_i + T2_i;
 	   end
 	   else begin
-	      if (counter == 5'h1F) begin
-		 counter <= 5'h0;
-		 en_next <= 1;
-	      end
 	      h_next <= g_next;
 	      g_next <= f_next;
 	      f_next <= e_next;
@@ -112,6 +109,12 @@ module sha_round #(parameter exit=0)
 	      b_next <= a_next;
 	      a_next <= T1_reg + T2_reg;
 	   end
-	end // if (en == 1)
-     end // always @ (posedge clk, reset)
-endmodule // sha256_round
+
+	   if (counter == (`DELAY - 1)) begin
+	      counter <= 5'h0;
+	      en_next <= 1;
+	   end
+
+	end
+     end
+endmodule

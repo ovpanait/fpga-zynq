@@ -11,7 +11,7 @@
 
  `define WORD_S 32
 
- `define DELAY 48
+ `define DELAY 16
 
  `define BLK_SIZE 512
 
