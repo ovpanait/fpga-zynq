@@ -18,8 +18,8 @@ module W_middle (
    genvar 			      i;
    
    generate
-      for (i=0; i < `W_BLKCNT; i=i+1) begin : WIN_ARR3
-	 assign  W_arr[i] = Win[(i+1)*32 - 1:i*32];
+      for (i=0; i < `W_BLKCNT; i=i+1) begin
+	 assign W_arr[i] = Win[i*`WORD_S +: `WORD_S];
       end
    endgenerate
    
@@ -47,10 +47,10 @@ module W_middle (
 	   if (cnt == (`DELAY - 1)) begin
 	      en_next <= 1;
 	      cnt <= 5'h0;
+	      
 	   end
 	   else
 	     cnt <= cnt + 5'h1;
 	end
-     end // always @ (posedge clk)
-
+     end 
 endmodule
