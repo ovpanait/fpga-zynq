@@ -1,6 +1,6 @@
 `include "sha.vh"
 
-module sha_round
+module sha_round #(LEFT = 1)
   (
    input 		      clk,
    input 		      reset,
@@ -44,8 +44,11 @@ module sha_round
    genvar 		      i;
 
    generate
-      for (i=0; i < `W_BLKCNT; i=i+1) begin : WIN_ARR
-	 assign  W_arr[i] = W[(i+1)*32 - 1:i*32];
+      for (i=0; i < `DELAY; i=i+1) begin : WIN_ARR
+	 if (LEFT == 1)
+	   assign  W_arr[i] = W[i*`WORD_S +: `WORD_S];
+	 else
+	   assign  W_arr[`DELAY - 1 -i] = W[`WARR_S - (i+1)*`WORD_S +: `WORD_S];
       end
    endgenerate
 
