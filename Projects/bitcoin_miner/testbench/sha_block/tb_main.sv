@@ -11,7 +11,7 @@ module tb_main();
 
    wire [255:0] H;
    wire 	en_o;
-    wire [31:0] nonce_out;
+   wire [31:0] 	nonce_out;
 
    localparam K = {
 		   32'hC67178F2, 32'hBEF9A3F7, 32'hA4506CEB, 32'h90BEFFFA,
@@ -92,25 +92,51 @@ module tb_main();
 	 en = 1;
 	 M = `T1_M1;
       end
-      
+
+`define TEST_DUT DUT.rounds2[2].round
+`define MID_DUT DUT.middle_layers[2].w_e
       @(negedge clk) en = 0;
       // Test output for 1st input
+      //      @(posedge DUT.en_o[4]);
       @(posedge en_o);
       @(negedge clk) begin
-	 tester #(32)::verify_output(DUT.abc_tmp[0][0], 32'b0);
-	 tester #(32)::verify_output(DUT.abc_tmp[0][1], 32'b0);
-	 tester #(32)::verify_output(DUT.abc_tmp[0][2], 32'b0);
-	 tester #(32)::verify_output(DUT.abc_tmp[0][3], 32'b0);
-	 tester #(32)::verify_output(DUT.abc_tmp[0][4], 32'b0);
-	 tester #(32)::verify_output(DUT.abc_tmp[0][5], 32'b0);
-	 tester #(32)::verify_output(DUT.abc_tmp[0][6], 32'b0);
-         tester #(32)::verify_output(DUT.abc_tmp[0][7], 32'b0);
-//
-	 $display("xxx: %H", DUT.H_tmp[0]);
-	 
+	 /*	 $display("xxx3: %H", `TEST_DUT.a);
+	  $display("xxx3: %H", `TEST_DUT.b);
+	  $display("xxx3: %H", `TEST_DUT.c);
+	  $display("xxx3: %H", `TEST_DUT.d);
+	  $display("xxx3: %H", `TEST_DUT.e);
+	  $display("xxx3: %H", `TEST_DUT.f);
+	  $display("xxx3: %H", `TEST_DUT.g);
+	  $display("xxx3: %H", `TEST_DUT.h);
+	  
+	  $display("xxx3: %H", `TEST_DUT.K);
+
+	  for (int i = 0 ; i < 16; i=i+1)
+	  $display("xxx4: W[%d]: %H", i, `TEST_DUT.W[i*32 +: 32]);
+
+	  $display("xxx3: %H", `TEST_DUT.K_arr);
+	  for (int i = 0 ; i < 16; i=i+1)
+	  $display("xxx4: W_arr[%d]: %H", i, `TEST_DUT.W_arr[i]);
+	  
+	  for (int i = 0 ; i < 16; i=i+1)
+	  $display("xxx4: W_middle[%d]: %H", i, `MID_DUT.W_arr[i]);
+	  for (int i = 0 ; i < 16; i=i+1)
+	  $display("xxx4: W_middle_in[%d]: %H", i, `MID_DUT.Win[i*32 +: 32]);
+
+	  $display("xxx3: %H", `TEST_DUT.a_next);
+	  $display("xxx3: %H", `TEST_DUT.b_next);
+	  $display("xxx3: %H", `TEST_DUT.c_next);
+	  $display("xxx3: %H", `TEST_DUT.d_next);
+	  $display("xxx3: %H", `TEST_DUT.e_next);
+	  $display("xxx3: %H", `TEST_DUT.f_next);
+	  $display("xxx3: %H", `TEST_DUT.g_next);
+	  $display("xxx3: %H", `TEST_DUT.h_next);
+	  $display("xxx3: %H", `TEST_DUT.en_next);
+	  */	 
 	 tester #(1)::verify_output(en_o, 1'b1);
 	 tester #($size(H))::verify_output(H, `T1_H1);
-	 $display("xxx: %H", H);
+
+	 //	 $finish;
 	 
       end // @ (posedge en_o)
       @(posedge clk);
@@ -134,6 +160,31 @@ module tb_main();
 
       $display("\nSimulation completed with %d errors\n", errors);
       $stop;
+      
    end
- 
+
+   /*   always @(`TEST_DUT.counter)
+    begin
+    $display("counter: %H", `TEST_DUT.counter);
+
+    $display("xxx3: %H", `TEST_DUT.a);
+    $display("xxx3: %H", `TEST_DUT.b);
+    $display("xxx3: %H", `TEST_DUT.c);
+    $display("xxx3: %H", `TEST_DUT.d);
+    $display("xxx3: %H", `TEST_DUT.e);
+    $display("xxx3: %H", `TEST_DUT.f);
+    $display("xxx3: %H", `TEST_DUT.g);
+    $display("xxx3: %H", `TEST_DUT.h);
+    $display("");
+    $display("xxx3: %H", `TEST_DUT.a_next);
+    $display("xxx3: %H", `TEST_DUT.b_next);
+    $display("xxx3: %H", `TEST_DUT.c_next);
+    $display("xxx3: %H", `TEST_DUT.d_next);
+    $display("xxx3: %H", `TEST_DUT.e_next);
+    $display("xxx3: %H", `TEST_DUT.f_next);
+    $display("xxx3: %H", `TEST_DUT.g_next);
+    $display("xxx3: %H", `TEST_DUT.h_next);
+    $display("xxx3: %H", `TEST_DUT.en_next);
+     end
+    */
 endmodule
