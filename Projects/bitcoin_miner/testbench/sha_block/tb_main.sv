@@ -7,6 +7,7 @@ module tb_main();
    reg clk;
    reg reset;
    reg en;
+   reg [31:0] nonce;
    reg [511:0] M;
 
    wire [255:0] H;
@@ -42,6 +43,7 @@ module tb_main();
 		  .reset(reset),
 		  .en(en),
 
+		  .nonce(nonce),
 		  .K(K),
 		  .M(M),
 		  .H_prev(H0),
@@ -90,6 +92,8 @@ module tb_main();
       // Testcase
       @(negedge clk) begin
 	 en = 1;
+	 nonce = 32'h11;
+	 
 	 M = `T1_M1;
       end
 
@@ -135,6 +139,7 @@ module tb_main();
 	  */	 
 	 tester #(1)::verify_output(en_o, 1'b1);
 	 tester #($size(H))::verify_output(H, `T1_H1);
+	 tester #($size(nonce_out))::verify_output(nonce_out, 32'h11);
 
 	 //	 $finish;
 	 
