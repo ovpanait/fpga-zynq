@@ -34,7 +34,7 @@ module sha_round #(LEFT = 1)
    output reg 		      en_next
    );
 
-   wire [`WORD_S-1:0] 	      W_arr[`W_BLKCNT-1:0];
+   wire [`WORD_S-1:0] 	      W_arr[`DELAY-1:0];
    wire [`WORD_S-1:0] 	      K_arr[`DELAY-1:0];
 
    wire [`W_MAX:0] 	      T1_i, T2_i;
