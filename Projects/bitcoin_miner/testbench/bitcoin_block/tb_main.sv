@@ -44,7 +44,7 @@ module tb_main();
 		       );
 
    // Test functions
-`include "test_fc.h"
+`include "test_fc.vh"
 
    initial begin
       clk <= 0;
@@ -89,7 +89,7 @@ module tb_main();
 	 $display("bitcoin block: %h", bitcoin_blk);
       end
       @(negedge clk)
-	 tester #(1)::verify_output(bitcoin_done, 1'b0);
+	tester #(1)::verify_output(bitcoin_done, 1'b0);
       
       @(negedge clk) reset = 1;
       
@@ -97,7 +97,7 @@ module tb_main();
        * TEST 2
        */
 
-       // Test 1
+      // Test 1
       $display("Begin testing scenario 2...");
 
       // Testcase init
@@ -116,15 +116,20 @@ module tb_main();
 	 blk_nonce = `BLK_NONCE;
       end
 
+      /*`define TEST_DUT DUT.block2
+       @(posedge `TEST_DUT.en_next) begin
+       tester #(256)::verify_output(`TEST_DUT.H, 256'h0);	 
+       $finish;
+      end
+       */      
       // Test output for 1st input
       //repeat(128) @(posedge clk);
       @(posedge bitcoin_done);
       @(negedge clk) begin
 	 tester #(256)::verify_output(bitcoin_blk, `BITCOIN_BLK);
-	 $display("bitcoin block: %h", bitcoin_blk);
       end
       @(negedge clk)
-	 tester #(1)::verify_output(bitcoin_done, 1'b0);
+	tester #(1)::verify_output(bitcoin_done, 1'b0);
       
       @(negedge clk) reset = 1;
       
