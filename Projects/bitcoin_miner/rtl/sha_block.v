@@ -40,6 +40,8 @@ module sha_block(
    endgenerate
 
    assign en_o[0] = en;
+   assign nonce_tmp[0] = nonce;
+   
    generate
       for (i = 0; i < 16 / `DELAY; i=i+1) begin : M_to_W
 	 W_start w_b(
@@ -85,7 +87,7 @@ module sha_block(
 			 .reset(reset),
 			 .en(en_o[i+1]),
 
-			 .nonce(nonce_tmp[i]),
+			 .nonce(nonce_tmp[i+1]),
 			 .a(abc_tmp[i][0]),
 			 .b(abc_tmp[i][1]),
 			 .c(abc_tmp[i][2]),
@@ -96,7 +98,7 @@ module sha_block(
 			 .h(abc_tmp[i][7]),
 			 .Hin(H_tmp[i+1]),
 
-			 .nonce_out(nonce_tmp[i+1]),
+			 .nonce_out(nonce_tmp[i+2]),
 			 .K(K[i*(`DELAY*`W_SIZE) +: `DELAY*`W_SIZE]),
 			 .W(W[i+1] >> i*`DELAY*`WORD_S), // FUCK: left vs right shift..
 
@@ -123,7 +125,7 @@ module sha_block(
 		.reset(reset),
 		.en(en_o[i+1]),
 
-		.nonce(nonce_tmp[i]),
+		.nonce(nonce_tmp[i+1]),
 		.a(abc_tmp[i][0]),
 		.b(abc_tmp[i][1]),
 		.c(abc_tmp[i][2]),
@@ -134,7 +136,7 @@ module sha_block(
 		.h(abc_tmp[i][7]),
 		.Hin(H_tmp[i+1]),
 
-		.nonce_out(nonce_tmp[i+1]),
+		.nonce_out(nonce_tmp[i+2]),
 		.K(K[i*(`DELAY*`W_SIZE) +: `DELAY*`W_SIZE]),
 		.W(W[i+1]),
 
@@ -159,7 +161,7 @@ module sha_block(
 		      .en(en_o[2*64/`DELAY]),
 
 		      .H_i(H_tmp[64/`DELAY]),
-		      .nonce(nonce_tmp[64/`DELAY]),
+		      .nonce(nonce_tmp[64/`DELAY+1]),
 
 		      .a(abc_tmp[64/`DELAY][0]),
 		      .b(abc_tmp[64/`DELAY][1]),
