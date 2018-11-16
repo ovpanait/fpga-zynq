@@ -1,6 +1,4 @@
-read_verilog  [ glob ./Sources/*.v ]
-read_verilog [ glob ./Tb/*.sv ]
-read_xdc [ glob -nocomplain ./Constraints/*.xdc ] -quiet
+source $env(SIM_TOP)/create_proj.tcl
 
 set_property top tb_main [current_fileset -simset]
 
