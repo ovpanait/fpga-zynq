@@ -8,6 +8,7 @@
 #include <termios.h>
 #include <sys/mman.h>
 #include <string.h>
+#include <stdint.h>
 
 #define MM2S_CONTROL_REGISTER 0x00
 #define MM2S_STATUS_REGISTER 0x04
@@ -118,12 +119,22 @@ int main() {
 	s2mm_status =  dma_get(virtual_address, S2MM_STATUS_REGISTER);
 	printf("xxx5: s2mm_status: 0x%08X\n", mm2s_status);	
 
-    virtual_source_address[0]= 0xF3F2F1F0; // Write random stuff to source block
-    virtual_source_address[1]= 0xF3F2F1F0; // Write random stuff to source block
-    memset(virtual_destination_address, 0, 8); // Clear destination block
+    uint32_t M []= {
+      0x02000000, // BLK_VERSION
+      0x671D0E2F, 0xF45DD1E9, 0x27A51219, 0xD1CA1065, 0xC93B0C4E, 0x8840290A, 0x00000000, 0x00000000, // prev_blk_header_hash
+      0x2CD900FC, 0x3513260D, 0xF5BD2EAB, 0xFD456CD2, 0xB3D2BACE, 0x30CC0782, 0x15A907C0, 0x45F4992E, // merkle_root_hash
+      0x74749054, // blk_time
+      0x747B1B18, // blk_nbits
+      0x43F740C0 // blk_nonce
+      };
+    
+    for (int i = 0; i < 20; ++i)
+      virtual_source_address[i] = M[i];
+      
+    memset(virtual_destination_address, 0, 4 * 8); // Clear destination block
 
-    printf("Source memory block:      "); memdump(virtual_source_address, 32);
-    printf("Destination memory block: "); memdump(virtual_destination_address, 32);
+    printf("Source memory block:      "); memdump(virtual_source_address, 4 * 20);
+    printf("Destination memory block: "); memdump(virtual_destination_address, 4*8);
 
     printf("Resetting DMA\n");
     dma_set(virtual_address, S2MM_CONTROL_REGISTER, 4);
@@ -137,38 +148,38 @@ int main() {
     dma_s2mm_status(virtual_address);
     dma_mm2s_status(virtual_address);
 
-    //printf("Writing destination address\n");
-    //dma_set(virtual_address, S2MM_DESTINATION_ADDRESS, 0x0f000000); // Write destination address
-    //dma_s2mm_status(virtual_address);
+    printf("Writing destination address\n");
+    dma_set(virtual_address, S2MM_DESTINATION_ADDRESS, 0x0f000000); // Write destination address
+    dma_s2mm_status(virtual_address);
 
     printf("Writing source address...\n");
     dma_set(virtual_address, MM2S_START_ADDRESS, 0x0e000000); // Write source address
     dma_mm2s_status(virtual_address);
 
-    /*printf("Starting S2MM channel with all interrupts masked...\n");
+    printf("Starting S2MM channel with all interrupts masked...\n");
     dma_set(virtual_address, S2MM_CONTROL_REGISTER, 0xF001);
-    dma_s2mm_status(virtual_address);*/
+    dma_s2mm_status(virtual_address);
 
     printf("Starting MM2S channel with all interrupts masked...\n");
     dma_set(virtual_address, MM2S_CONTROL_REGISTER, 0xF001);
     dma_mm2s_status(virtual_address);
 
-    /*printf("Writing S2MM transfer length...\n");
-    dma_set(virtual_address, S2MM_LENGTH, 32);
-    dma_s2mm_status(virtual_address);*/
+    printf("Writing S2MM transfer length...\n");
+    dma_set(virtual_address, S2MM_LENGTH, 4 * 8);
+    dma_s2mm_status(virtual_address);
 
     printf("Writing MM2S transfer length...\n");
-    dma_set(virtual_address, MM2S_LENGTH, 32);
+    dma_set(virtual_address, MM2S_LENGTH, 4 * 20);
     dma_mm2s_status(virtual_address);
 
     printf("Waiting for MM2S synchronization...\n");
     dma_mm2s_sync(virtual_address);
 
-    //printf("Waiting for S2MM sychronization...\n");
-    //dma_s2mm_sync(virtual_address); // If this locks up make sure all memory ranges are assigned under Address Editor!
+    printf("Waiting for S2MM sychronization...\n");
+    dma_s2mm_sync(virtual_address); // If this locks up make sure all memory ranges are assigned under Address Editor!
 
-    //dma_s2mm_status(virtual_address);
+    dma_s2mm_status(virtual_address);
     dma_mm2s_status(virtual_address);
 
-    printf("Destination memory block: "); memdump(virtual_destination_address, 32);
+    printf("Destination memory block: "); memdump(virtual_destination_address, 4 * 8);
 }
