@@ -5,7 +5,6 @@ module W_start (
 		input 			 reset,
 		input 			 en,
 
-		input [`WORD_S-1:0] 	 nonce,
 		input [`WARR_S-1:0] 	 W_in,
 
 		output reg [`WARR_S-1:0] W,
