@@ -7,4 +7,6 @@ export SCRIPTS_TOP="$(pwd)/Scripts/tcl"
 export SIM_TOP="$SCRIPTS_TOP/Simulation"
 export INCLUDE_DIR="$(pwd)/Templates/include"
 
+export TCL_INCLUDE="${SCRIPTS_TOP}/include"
+
 export PATH="$PATH:$(ls -1d $SCRIPTS_TOP/*/ | tr "\n" ":")"
