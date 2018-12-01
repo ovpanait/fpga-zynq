@@ -1,3 +1,5 @@
+source $env(TCL_INCLUDE)/debug.tcl
+
 set outputDir ./outputs
 file mkdir $outputDir
 
