@@ -25,3 +25,5 @@ set_repo_path "${XIL_SDK}"
 create_sw_design device-tree -os device_tree -proc ps7_cortexa9_0
 generate_target -dir my_dts
 EOF
+
+dtc -I dts -O dtb -o zynq-artyz7.dtb ./my_dts/system-top.dts
