@@ -1,4 +1,4 @@
-set ip_name test_ip
+set ip_name [lindex $argv 0]
 set ip_repo_path "[pwd]/ip_repo"
 set ip_path "[pwd]/ip_repo/$ip_name"
 
