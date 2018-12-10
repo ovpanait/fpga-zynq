@@ -6,7 +6,7 @@ usage() {
 WARNING: Command line arguments are executed sequentially.
 Usage: 
 Export simulation:
-$SCRIPT [--top <top_module_name] --export-sim
+$SCRIPT [--top <top_module_name] --export_sim
 
 Simulate:
 $SCRIPT --sim
