@@ -1,11 +1,13 @@
 AXI-stream FIFO (16 x 32-bit FIFO)
 ----------------------------------
 
-Simulate this IP (tested with Vivado 2018.2):
+Simulation (tested with Vivado 2018.2):
 
+```sh
 $ git clone https://github.com/ovpanait/fpga-zynq.git
 $ cd fpga-zynq
-$ export VIVADO_SDK="$HOME/Xilinx/Tools/Vivado/2018.2/settings64.sh" -> adjust this per your Vivado installation directory
+# adjust this per your Vivado sdk directory
+$ export VIVADO_SDK="$HOME/Xilinx/Tools/Vivado/2018.2/settings64.sh"
 $ . init_simenv.sh
 $ cd Projects/axi_stream_FIFO
 $ axi_stream.sh --top axis_fifo --create-axis-sim-proj --force
@@ -46,4 +48,11 @@ Slave VIP data:  0xd93a0034
 Slave VIP data:  0x0e189418
 Slave VIP data:  0x02ed3c88
 
-^ The data sent by the Master FIFO passes through the FIFO and back to the Slave VIP
+#
+#  Data sent by the Master VIP (axi4_stream_vip_0) should match the one received by
+#  the Slave VIP (axi4_stream_vip_1)
+#
+```
+
+Testbench block design(open generated test_proj/test_proj.xpr):
+![](https://github.com/ovpanait/fpga-zynq/blob/master/Projects/axi_stream_FIFO/testbench.png)
