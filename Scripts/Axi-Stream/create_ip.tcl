@@ -18,8 +18,8 @@ ipx::edit_ip_in_project -upgrade true -name edit_$ip_name -directory $ip_path $i
 # Add hdl sources
 remove_files {*}[glob $ip_path/[set ip_name]_1.0/hdl/*.v]
 file delete {*}[glob $ip_path/[set ip_name]_1.0/hdl/*.v]
-add_files [glob Sources/*.v] -copy_to $ip_path/[set ip_name]_1.0/hdl
-add_files [glob -nocomplain Sources/*.vh] -quiet -copy_to $ip_path/[set ip_name]_1.0/hdl
+add_files [glob hdl/*.v] -copy_to $ip_path/[set ip_name]_1.0/hdl
+add_files [glob -nocomplain hdl/*.vh] -quiet -copy_to $ip_path/[set ip_name]_1.0/hdl
 set_property top $ip_name [current_fileset]
 
 # Add testbench sources

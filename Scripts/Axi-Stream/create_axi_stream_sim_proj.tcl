@@ -67,7 +67,7 @@ launch_runs -jobs 8 {design_1_axi4stream_vip_0_0_synth_1 design_1_axi4stream_vip
 
 # Simulation
 set_property SOURCE_SET sources_1 [get_filesets sim_1]
-add_files -fileset [get_filesets sim_1] -norecurse [pwd]/Tb/tb_main.sv
+add_files -fileset [get_filesets sim_1] -norecurse [pwd]/tb/tb_main.sv
 
 foreach ip [get_ips] {
 	add_files -fileset [get_filesets sim_1] [get_files -compile_order sources -used_in simulation -of [get_files [set ip].xci]]
