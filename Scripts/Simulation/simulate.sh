@@ -1,33 +1,34 @@
 #!/bin/bash
 set -e
 
+SCRIPT_NAME="$(basename $0)"
+SCRIPT_DIR="$(dirname $0)"
+
+LOGGING="-nolog -nojournal"
+top=""
+
 usage() {
     cat <<EOF
-WARNING: Command line arguments are executed sequentially.
+INFO: Command line arguments are executed sequentially.
 Usage: 
 Export simulation:
-$SCRIPT [--top <top_module_name] --export_sim
+$SCRIPT_NAME [--top <top_module_name] --export_sim
 
 Simulate:
-$SCRIPT --sim
+$SCRIPT_NAME --sim
 
 Synthesize design:
-$SCRIPT --top <top_module_name> --synth
+$SCRIPT_NAME --top <top_module_name> --synth
 
 Implement design:
-$SCRIPT --top <top_module_name> --implement
+$SCRIPT_NAME --top <top_module_name> --implement
 
 Create project and open vivado tcl shell:
-$SCRIPT --console_proj
+$SCRIPT_NAME --console_proj
 EOF
 
     exit 1;
 }
-
-SCRIPT="$(basename "$0")"
-
-LOGGING="-nolog -nojournal"
-top=""
 
 while [ "$1" != "" ];do
     opt="$1"
@@ -41,11 +42,11 @@ while [ "$1" != "" ];do
 	    [ "$1" == "" ] && usage
 	    ;;
 	"--console-proj")
-	    vivado -mode tcl -source "$SIM_TOP"/create_proj.tcl ${LOGGING};
+	    vivado -mode tcl -source "${SCRIPT_DIR}"/create_proj.tcl ${LOGGING};
 	    exit 0
 	    ;;
 	"--export_sim")
-	    vivado -mode tcl -source "$SIM_TOP"/export_sim.tcl ${LOGGING}
+	    vivado -mode tcl -source "${SCRIPT_DIR}"/export_sim.tcl ${LOGGING}
 	    ;;
 	"--sim")
 	    pushd ./outputs/export_sim/xsim > /dev/null
@@ -55,13 +56,13 @@ while [ "$1" != "" ];do
 	"--synth")
 	    [ "$top" == "" ] && { echo "ERROR: Top module option missing.";
 				  usage; }
-	    vivado -mode tcl -source "$SIM_TOP"/synth.tcl ${LOGGING} \
+	    vivado -mode tcl -source "${SCRIPT_DIR}"/synth.tcl ${LOGGING} \
 		   -tclargs "$top"
 	    ;;
 	"--implement")
 	    [ "$top" == "" ] && { echo "ERROR: Top module option missing.";
 				  usage; }
-	    vivado -mode tcl -source "$SIM_TOP"/implement.tcl ${LOGGING} \
+	    vivado -mode tcl -source "${SCRIPT_DIR}"/implement.tcl ${LOGGING} \
 		   -tclargs "$top"
 	    ;;
     esac
