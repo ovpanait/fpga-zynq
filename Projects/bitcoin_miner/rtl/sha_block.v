@@ -34,19 +34,15 @@ module sha_block(
 
    assign en_o[0] = en;
    
-   generate
-      for (i = 0; i < 16 / `DELAY; i=i+1) begin : M_to_W
-	 W_start w_b(
-		     .clk(clk),
-		     .reset(reset),
-		     .en(en_o[i]),
+   W_start w_b(
+	       .clk(clk),
+	       .reset(reset),
+	       .en(en_o[0]),
 
-		     .W_in(W[i]),
+	       .W_in(W[0]),
 
-		     .W(W[i+1]),
-		     .en_next(en_o[i+1]));
-      end
-   endgenerate
+	       .W(W[16/`DELAY]),
+	       .en_next(en_o[1]));
 
    reg [`H_SIZE-1:0] H_delay;
    reg [`WORD_S-1:0] nonce_delay;
@@ -67,15 +63,15 @@ module sha_block(
    endgenerate
 
    generate
-      for (i = 16/`DELAY; i < 64/`DELAY; i=i+1) begin : middle_layers
+      for (i = 0; i < 48/`DELAY; i=i+1) begin : middle_layers
 	 W_middle w_e(
 		      .clk(clk),
 		      .reset(reset),
-		      .en(en_o[i]),
-		      .Win(W[i]),
+		      .en(en_o[16/`DELAY+i]),
+		      .Win(W[16/`DELAY+i]),
 	    
-		      .W(W[i+1]),
-		      .en_next(en_o[i+1]));
+		      .W(W[16/`DELAY+i+1])
+		      );
       end
    endgenerate
 
@@ -106,7 +102,7 @@ module sha_block(
 
 			 .nonce_out(nonce_tmp[i+1]),
 			 .K(K[i*(`DELAY*`W_SIZE) +: `DELAY*`W_SIZE]),
-			 .W(W[i+1] >> i*`DELAY*`WORD_S), // FUCK: left vs right shift..
+			 .W(W[16/`DELAY] >> i*`DELAY*`WORD_S), // FUCK: left vs right shift..
 
 			 .a_next(abc_tmp[i+1][0]),
 			 .b_next(abc_tmp[i+1][1]),
@@ -118,7 +114,7 @@ module sha_block(
 			 .h_next(abc_tmp[i+1][7]),
 			 .H(H_tmp[i+1]),
 
-			 .en_next(en_o[64/`DELAY + 1 + i])
+			 .en_next(en_o[i+2])
 			 );
       end
    endgenerate
@@ -156,7 +152,7 @@ module sha_block(
 		.h_next(abc_tmp[i+1][7]),
 		.H(H_tmp[i+1]),
 
-		.en_next(en_o[64/`DELAY + 1 + i])
+		.en_next(en_o[i+2])
 		);
       end
    endgenerate
@@ -164,7 +160,7 @@ module sha_block(
    sha_hash hash_out (
 		      .clk(clk),
 		      .reset(reset),
-		      .en(en_o[2*64/`DELAY]),
+		      .en(en_o[64/`DELAY+1]),
 
 		      .H_i(H_tmp[64/`DELAY]),
 		      .nonce(nonce_tmp[64/`DELAY]),

@@ -6,8 +6,7 @@ module W_middle (
 		 input 		      en,
 		 input [`WARR_S-1:0]  Win,
 
-		 output [`WARR_S-1:0] W,
-		 output reg 	      en_next
+		 output [`WARR_S-1:0] W
 		 );
 
    wire [`WORD_S-1:0] 		      W_arr[`W_BLKCNT + `DELAY -1:0];
@@ -37,20 +36,14 @@ module W_middle (
    
    always @(posedge clk)
      begin
-	en_next <= 0;
-
-	if (reset == 1) begin
-	   en_next <= 0;
-	end else if (cnt != 5'h0 || (cnt == 5'h0 && en != 0)) begin
+	if (cnt != 5'h0 || (cnt == 5'h0 && en != 0)) begin
 	   W_buf[cnt] <= `sig1(W_arr[`W_BLKCNT + cnt - 2]) + W_arr[`W_BLKCNT + cnt - 7] + `sig0(W_arr[`W_BLKCNT + cnt - 15]) + W_arr[`W_BLKCNT + cnt - 16];
 
 	   if (cnt == (`DELAY - 1)) begin
-	      en_next <= 1;
 	      cnt <= 5'h0;
-	      
 	   end
 	   else
 	     cnt <= cnt + 5'h1;
 	end
-     end 
+     end
 endmodule
