@@ -227,7 +227,7 @@ module test_ip #
      begin
 	if(!s00_axis_aresetn)
 	  begin
-	     write_pointer <= 0;
+	     write_pointer <= 1'b0;
 	     writes_done <= 1'b0;
 	  end
 	else
@@ -239,7 +239,7 @@ module test_ip #
 	               writes_done <= 1'b1;
 	            end
 	          else begin
-                     write_pointer <= write_pointer + 1;
+                     write_pointer <= write_pointer + 1'b1;
 	          end
 	       end
 

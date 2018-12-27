@@ -27,8 +27,8 @@ module sha_block(
    
    // W[0] = reverse(M)
    generate
-      for (i = 0; i < `WARR_S / `W_SIZE; i=i+1) begin
-	 assign W[0][i*`W_SIZE +: `W_SIZE] = M[`WARR_S - (i+1)*`W_SIZE +: `W_SIZE]; 
+      for (i = 0; i < `WARR_S / `WORD_S; i=i+1) begin
+	 assign W[0][i*`WORD_S +: `WORD_S] = M[`WARR_S - (i+1)*`WORD_S +: `WORD_S]; 
       end
    endgenerate
 
@@ -57,8 +57,8 @@ module sha_block(
    assign nonce_tmp[0] = nonce_delay;
 
    generate
-      for (i = 0; i < `H_SIZE / `W_SIZE; i=i+1) begin
-	 assign H_tmp[0][i*`W_SIZE +: `W_SIZE] = H_delay[i*`W_SIZE +: `W_SIZE]; 
+      for (i = 0; i < `H_SIZE / `WORD_S; i=i+1) begin
+	 assign H_tmp[0][i*`WORD_S +: `WORD_S] = H_delay[i*`WORD_S +: `WORD_S]; 
       end
    endgenerate
 
@@ -78,7 +78,7 @@ module sha_block(
    // SHA ROUNDS
    generate
       for (i = 0; i < 8; i=i+1) begin
-	 assign  abc_tmp[0][7 - i] = H_tmp[0][i*`W_SIZE +: `W_SIZE]; // shit
+	 assign  abc_tmp[0][7 - i] = H_tmp[0][i*`WORD_S +: `WORD_S]; // shit
       end
    endgenerate
 
@@ -101,7 +101,7 @@ module sha_block(
 			 .Hin(H_tmp[i]),
 
 			 .nonce_out(nonce_tmp[i+1]),
-			 .K(K[i*(`DELAY*`W_SIZE) +: `DELAY*`W_SIZE]),
+			 .K(K[i*(`DELAY*`WORD_S) +: `DELAY*`WORD_S]),
 			 .W(W[16/`DELAY] >> i*`DELAY*`WORD_S), // FUCK: left vs right shift..
 
 			 .a_next(abc_tmp[i+1][0]),
@@ -139,7 +139,7 @@ module sha_block(
 		.Hin(H_tmp[i]),
 
 		.nonce_out(nonce_tmp[i+1]),
-		.K(K[i*(`DELAY*`W_SIZE) +: `DELAY*`W_SIZE]),
+		.K(K[i*(`DELAY*`WORD_S) +: `DELAY*`WORD_S]),
 		.W(W[i+1]),
 
 		.a_next(abc_tmp[i+1][0]),

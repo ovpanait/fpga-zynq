@@ -21,12 +21,12 @@ module axis_bitcoin_miner #
 
    genvar 						   j;
    generate for (j = 0; j < NUMBER_OF_INPUT_WORDS; j=j+1) begin
-      assign in_stream_data_fifo[j] =  in_fifo[j*32 +: 32];
+      assign in_stream_data_fifo[j] =  in_fifo[j*`WORD_S +: `WORD_S];
    end
    endgenerate
 
    generate for (j = 0; j < NUMBER_OF_OUTPUT_WORDS; j=j+1) begin
-      assign  out_fifo[j*32 +: 32] = out_stream_data_fifo[j];
+      assign  out_fifo[j*`WORD_S +: `WORD_S] = out_stream_data_fifo[j];
    end
    endgenerate   
    
@@ -71,7 +71,7 @@ module axis_bitcoin_miner #
    
    // Map out_stream_data_fifo to bitcoin_block outputs
    generate for (j = 0; j < 8; j=j+1) begin
-      assign out_stream_data_fifo[8 - 1 - j] =  bitcoin_blk[j*32 +: 32];
+      assign out_stream_data_fifo[8 - 1 - j] =  bitcoin_blk[j*`WORD_S +: `WORD_S];
    end
    endgenerate
    

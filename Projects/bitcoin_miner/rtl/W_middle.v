@@ -30,7 +30,7 @@ module W_middle (
 
    generate
       for (i=0; i < `W_BLKCNT; i=i+1) begin : W_out
-	 assign  W[i*`W_SIZE +: `W_SIZE] = W_arr[`DELAY + i];
+	 assign  W[i*`WORD_S +: `WORD_S] = W_arr[`DELAY + i];
       end
    endgenerate
    

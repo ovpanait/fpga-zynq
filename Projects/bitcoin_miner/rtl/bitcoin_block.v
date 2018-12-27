@@ -1,7 +1,7 @@
 `include "sha.vh"
 
 /*
- * Module for generating bitcoin block
+ * Module for generating bitcoin block. (SHA256(SHA256(bitcoin block header))
  */
 
 /*
