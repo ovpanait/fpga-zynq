@@ -9,62 +9,84 @@ top=""
 
 usage() {
     cat <<EOF
-INFO: Command line arguments are executed sequentially.
-Usage: 
-Export simulation:
-$SCRIPT_NAME [--top <top_module_name] --export_sim
-
-Simulate:
-$SCRIPT_NAME --sim
-
-Synthesize design:
-$SCRIPT_NAME --top <top_module_name> --synth
-
-Implement design:
-$SCRIPT_NAME --top <top_module_name> --implement
-
-Create project and open vivado tcl shell:
-$SCRIPT_NAME --console_proj
+TODO
 EOF
-
     exit 1;
 }
 
 while [ "$1" != "" ];do
-    opt="$1"
-    case $opt in
+    OPT="$1"
+    case $OPT in
 	"--help")
-	    usage;
+	    HELP="1"
 	    ;;
 	"--top")
 	    shift
-	    top="$1"
-	    [ "$1" == "" ] && usage
+	    TOP="$1"
 	    ;;
 	"--console-proj")
-	    vivado -mode tcl -source "${SCRIPT_DIR}"/create_proj.tcl ${LOGGING};
-	    exit 0
+	    CONSOLE="1"
 	    ;;
 	"--export_sim")
-	    vivado -mode tcl -source "${SCRIPT_DIR}"/export_sim.tcl ${LOGGING}
+	    EXPORT_SIM="1"
 	    ;;
 	"--sim")
-	    pushd ./outputs/export_sim/xsim > /dev/null
-	    ./tb_main.sh -reset_run && ./tb_main.sh
-	    popd
+	    SIM="1"
 	    ;;
 	"--synth")
-	    [ "$top" == "" ] && { echo "ERROR: Top module option missing.";
-				  usage; }
-	    vivado -mode tcl -source "${SCRIPT_DIR}"/synth.tcl ${LOGGING} \
-		   -tclargs "$top"
+	    SYNTH="1"
 	    ;;
 	"--implement")
-	    [ "$top" == "" ] && { echo "ERROR: Top module option missing.";
-				  usage; }
-	    vivado -mode tcl -source "${SCRIPT_DIR}"/implement.tcl ${LOGGING} \
-		   -tclargs "$top"
+	    IMPLEMENT="1"
+	    ;;
+	*)
+	    echo "${OPT} invalid argument. Exiting..."
+	    exit 1
 	    ;;
     esac
     shift
 done
+
+if [ "${HELP}" == "1" ];then
+    usage;
+    exit 1
+fi
+
+if [ "${CONSOLE}" == "1" ];then
+    vivado -mode tcl -source "${SCRIPT_DIR}"/create_proj.tcl ${LOGGING};
+    exit 0
+fi
+
+if [ "${EXPORT_SIM}" == "1" ];then
+    vivado -mode tcl -source "${SCRIPT_DIR}"/export_sim.tcl ${LOGGING}
+fi
+
+if [ "${SIM}" == "1" ];then
+    pushd ./outputs/export_sim/xsim > /dev/null
+    ./tb_main.sh -reset_run && ./tb_main.sh
+    popd
+fi
+
+if [ "${SYNTH}" != "1" -a "${IMPLEMENT}" != "1" ]; then
+   exit 0
+fi
+
+if [ -z "${TOP}" ]; then
+    echo "ERROR: --top <top_module> missing"
+    usage;
+    exit 1
+fi
+
+if [ "${SYNTH}" == "1" ];then
+    [ "$top" == "" ] && { echo "ERROR: Top module option missing.";
+			  usage; }
+    vivado -mode tcl -source "${SCRIPT_DIR}"/synth.tcl ${LOGGING} \
+	   -tclargs "$top"
+fi
+
+if [ "${IMPLEMENT}" == "1" ]; then
+    [ "$top" == "" ] && { echo "ERROR: Top module option missing.";
+			  usage; }
+    vivado -mode tcl -source "${SCRIPT_DIR}"/implement.tcl ${LOGGING} \
+	   -tclargs "$top"
+fi
