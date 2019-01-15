@@ -1,7 +1,6 @@
 source $env(TCL_INCLUDE)/debug.tcl
 
 set outputDir ./outputs
-file mkdir $outputDir
 
 read_verilog  [ glob ./hdl/*.v ]
 read_verilog [ glob -nocomplain ./hdl/*.sv ] -quiet
