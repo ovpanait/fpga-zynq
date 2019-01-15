@@ -78,15 +78,11 @@ if [ -z "${TOP}" ]; then
 fi
 
 if [ "${SYNTH}" == "1" ];then
-    [ "$top" == "" ] && { echo "ERROR: Top module option missing.";
-			  usage; }
     vivado -mode tcl -source "${SCRIPT_DIR}"/synth.tcl ${LOGGING} \
-	   -tclargs "$top"
+	   -tclargs "${TOP}"
 fi
 
 if [ "${IMPLEMENT}" == "1" ]; then
-    [ "$top" == "" ] && { echo "ERROR: Top module option missing.";
-			  usage; }
     vivado -mode tcl -source "${SCRIPT_DIR}"/implement.tcl ${LOGGING} \
-	   -tclargs "$top"
+	   -tclargs "${TOP}"
 fi
