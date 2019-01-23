@@ -43,7 +43,7 @@ while [ "$1" != "" ];do
 	"--console-proj")
 	    CONSOLE="1"
 	    ;;
-	"--export_sim")
+	"--export-sim")
 	    EXPORT_SIM="1"
 	    ;;
 	"--sim")
