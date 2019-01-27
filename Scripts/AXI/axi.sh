@@ -40,7 +40,7 @@ while [ "$1" != "" ];do
 	    AXIS_PROJ="1"
 	    ;;
 	*)
-	    echo "$opt : Unrecognized option. Exiting..."
+	    echo "${OPT} : Unrecognized option. Exiting..."
 	    usage
 	    exit 1
 	    ;;

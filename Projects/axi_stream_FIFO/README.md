@@ -10,7 +10,7 @@ $ cd fpga-zynq
 $ export VIVADO_SDK="$HOME/Xilinx/Tools/Vivado/2018.2/settings64.sh"
 $ . init_simenv.sh
 $ cd Projects/axi_stream_FIFO
-$ axi_stream.sh --top axis_fifo --create-axis-sim-proj --force
+$ axi.sh --top axis_fifo --create-axis-sim-proj --force
 $ simulate.sh --sim
 ...
 Sending 16 transactions...
