@@ -1,6 +1,6 @@
 `include "sha.vh"
 
-module test_ip #
+module bitcoin_miner_top #
   (
    /*
     * Master side parameters
