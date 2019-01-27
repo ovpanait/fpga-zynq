@@ -90,7 +90,7 @@ module axis_fifo #
     * Master side I/O Connections assignments
     */
    assign m00_axis_tvalid	= axis_tvalid;
-   assign m00_axis_tdata	= stream_data_out;
+   assign m00_axis_tdata	= stream_data_fifo[read_pointer];
    assign m00_axis_tlast	= axis_tlast;
    assign m00_axis_tstrb	= {(C_M_AXIS_TDATA_WIDTH/8){1'b1}};
 
@@ -148,6 +148,7 @@ module axis_fifo #
 
    assign axis_tlast = (read_pointer == FIFO_LEN - 1);
    assign axis_tvalid = (mst_exec_state == MASTER_SEND) && !tx_done;
+   assign tx_en = m00_axis_tready && axis_tvalid;
 
    always@(posedge m00_axis_aclk)
      begin
@@ -158,10 +159,10 @@ module axis_fifo #
 	  end
 	else begin
 	   tx_done <= 1'b0;
-	   
+
 	   if (tx_en)
              begin
-		if (read_pointer == FIFO_LEN -1)
+		if (read_pointer == FIFO_LEN - 1'b1)
 		  begin
 		     read_pointer <= 1'b0;
 		     tx_done <= 1'b1;
@@ -175,23 +176,6 @@ module axis_fifo #
 	end
      end
 
-   assign tx_en = m00_axis_tready && axis_tvalid;
-
-   always@(posedge m00_axis_aclk)
-     begin
-	if(!m00_axis_aresetn)
-	  begin
-	     stream_data_out <= 1'b0;
-	  end
-	else begin
-	   stream_data_out <= stream_data_fifo[read_pointer];
-	   if (tx_en)
-             begin
-		stream_data_out <= stream_data_fifo[read_pointer + 1'b1];
-	     end
-	end
-     end
-   
    // =====================================================================
 
    /*
