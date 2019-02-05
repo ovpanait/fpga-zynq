@@ -33,17 +33,11 @@ ipx::merge_project_changes hdl_parameters [ipx::current_core]
 # If we don't do this here, it will generate subtle errors when running simulation
 synth_design -rtl
 
-#launch_runs synth_1 -jobs 8
-#wait_on_run synth_1
-
 set_property core_revision 1 [ipx::current_core]
 ipx::update_source_project_archive -component [ipx::current_core]
 ipx::create_xgui_files [ipx::current_core]
 ipx::update_checksums [ipx::current_core]
 ipx::save_core [ipx::current_core]
-
-#update_ip_catalog -rebuild
-#update_ip_catalog -rebuild -repo_path /home/ovidiu/Xilinx/xilinx-projects-temp/test2/ip_repo/test_ip/test_ip_1.0
 
 close_project -delete
 
