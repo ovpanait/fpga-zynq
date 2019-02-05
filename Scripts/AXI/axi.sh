@@ -11,14 +11,17 @@ usage() {
     cat <<EOF
 
 Usage:
-${SCRIPT_NAME} --top <top_module> [--help] [--force] [--create-axis-sim-proj]
+${SCRIPT_NAME} --top <top_module> --axi-type {full | lite | stream} --interface-type {master | slave | master_slave} [optional args]
 
 Create AXI-Stream IP from the current directory hierarchy.
 
-Options:
---top			Specify Verilog top module
---create-axis-sim-proj	Create generic AXI STREAM simulation project
---force			Overwrite "${IP_REPO_DIR}" directory
+All options:
+--top			Verilog top module
+--axi-type 		 AXI IP type
+--interface-type  	 AXI interfaces of the IP
+--create-axis-sim-proj	 Create generic AXI STREAM simulation project
+--force			 Overwrite "${IP_REPO_DIR}" directory
+--help			 Show help
 EOF
     exit 1;
 }
@@ -28,7 +31,7 @@ while [ "$1" != "" ];do
     case ${OPT} in
 	"--help")
 	    HELP="1"
-	;;
+	    ;;
 	"--top")
 	    shift
 	    TOP="$1"
@@ -38,6 +41,14 @@ while [ "$1" != "" ];do
 	    ;;
 	"--create-axis-sim-proj")
 	    AXIS_PROJ="1"
+	    ;;
+	"--axi-type")
+	    shift
+	    AXI_TYPE="${1}"
+	    ;;
+	"--interface-type")
+	    shift
+	    INT_TYPE="${1}"
 	    ;;
 	*)
 	    echo "${OPT} : Unrecognized option. Exiting..."
@@ -73,8 +84,8 @@ fi
 
 rm -rf "${IP_REPO_DIR}"
 
-# Create AXI-Stream IP
-vivado -mode tcl -source "${SCRIPT_DIR}"/create_ip.tcl -nolog -nojour -tclargs "${TOP}"
+# Create AXI IP
+vivado -mode tcl -source "${SCRIPT_DIR}"/create_ip.tcl -nolog -nojour -tclargs "${TOP}" "${AXI_TYPE}" "${INT_TYPE}"
 
 #
 # Create generic AXI-Stream simulation project

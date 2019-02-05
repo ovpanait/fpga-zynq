@@ -1,4 +1,11 @@
+source $env(TCL_INCLUDE)/debug.tcl
+
+# Command line parameters
 set ip_name [lindex $argv 0]
+set axi_type [lindex $argv 1]
+set int_type [lindex $argv 2]
+
+# IP info
 set ip_repo_path "[pwd]/ip_repo"
 set ip_path "[pwd]/ip_repo/$ip_name"
 
@@ -7,8 +14,12 @@ file mkdir "[pwd]/ip_repo"
 create_project -part xc7z020clg400-1 $ip_name $ip_path
 
 create_peripheral user.org user $ip_name 1.0 -dir $ip_path
-add_peripheral_interface S00_AXIS -interface_mode slave -axi_type stream [ipx::find_open_core user.org:user:$ip_name:1.0]
-add_peripheral_interface M00_AXIS -interface_mode master -axi_type stream [ipx::find_open_core user.org:user:$ip_name:1.0]
+if {$int_type == "slave" || $int_type == "master_slave"} {
+	add_peripheral_interface S00_AXIS -interface_mode slave -axi_type $axi_type [ipx::find_open_core user.org:user:$ip_name:1.0]
+}
+if {$int_type == "master" || $int_type == "master_slave"} {
+	add_peripheral_interface M00_AXIS -interface_mode master -axi_type $axi_type [ipx::find_open_core user.org:user:$ip_name:1.0]
+}
 generate_peripheral [ipx::find_open_core user.org:user:$ip_name:1.0]
 write_peripheral [ipx::find_open_core user.org:user:$ip_name:1.0]
 
