@@ -1,7 +1,7 @@
 AXI-stream FIFO (16 x 32-bit FIFO)
 ----------------------------------
 
-Simulation (tested with Vivado 2018.2):
+Fast Simulation (tested with Vivado 2018.2):
 
 ```sh
 $ git clone https://github.com/ovpanait/fpga-zynq.git
@@ -10,8 +10,7 @@ $ cd fpga-zynq
 $ export VIVADO_SDK="$HOME/Xilinx/Tools/Vivado/2018.2/settings64.sh"
 $ . init_simenv.sh
 $ cd Projects/axi_stream_FIFO
-$ axi.sh --top axis_fifo --create-axis-sim-proj --axi-type stream --interface-type master_slave --force
-$ simulate.sh --sim
+$ make
 ...
 Sending 16 transactions...
 Master VIP data:  0xa75e9220
@@ -52,6 +51,8 @@ Slave VIP data:  0x02ed3c88
 #  Data sent by the Master VIP (axi4_stream_vip_0) should match the one received by
 #  the Slave VIP (axi4_stream_vip_1)
 #
+
+$ make clean
 ```
 
 Testbench block design(open generated test_proj/test_proj.xpr):
