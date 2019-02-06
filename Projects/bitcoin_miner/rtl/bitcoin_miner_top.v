@@ -83,7 +83,6 @@ module bitcoin_miner_top #
    reg 		     axis_tlast_delay;
    
    wire [C_M_AXIS_TDATA_WIDTH-1 : 0] out_stream_data_fifo [0 : NUMBER_OF_OUTPUT_WORDS - 1];
-   reg [C_M_AXIS_TDATA_WIDTH-1 : 0] stream_data_out;
    wire 			    tx_en;
 
    reg 				    tx_done;
@@ -160,12 +159,13 @@ module bitcoin_miner_top #
     * Master side I/O Connections assignments
     */
    assign m00_axis_tvalid	= axis_tvalid;
-   assign m00_axis_tdata	= stream_data_out;
+   assign m00_axis_tdata	= out_stream_data_fifo[read_pointer];
    assign m00_axis_tlast	= axis_tlast;
    assign m00_axis_tstrb	= {(C_M_AXIS_TDATA_WIDTH/8){1'b1}};
 
    assign axis_tlast = (read_pointer == NUMBER_OF_OUTPUT_WORDS-1);
    assign axis_tvalid = (mst_exec_state == MASTER_SEND) && !tx_done;
+   assign tx_en = m00_axis_tready && axis_tvalid;
 
    always @(posedge m00_axis_aclk)
      begin
@@ -193,24 +193,8 @@ module bitcoin_miner_top #
 	end
      end
 
-   assign tx_en = m00_axis_tready && axis_tvalid;
-
-   always@(posedge m00_axis_aclk)
-     begin
-	if(!m00_axis_aresetn)
-	  begin
-	     stream_data_out <= 1'b0;
-	  end
-	else begin
-	   stream_data_out <= out_stream_data_fifo[read_pointer];
-	   if (tx_en)
-             begin
-		stream_data_out <= out_stream_data_fifo[read_pointer + 1'b1];
-	     end
-	end
-     end
-   
-   // =====================================================================
+ 
+  // =====================================================================
 
    /*
     * Slave side logic
