@@ -11,7 +11,7 @@ module blinky_top #
    )
    (
     // Users to add ports here
-    output [3:0] 				led,
+    output [2:0] 				rgb,
     // User ports ends
     // Do not modify the ports beyond this line
 
@@ -40,13 +40,13 @@ module blinky_top #
     input wire 					s00_axi_rready
     );
    // Instantiation of Axi Bus Interface S00_AXI
-   blinky #( 
+   blinky #(
 	     .C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
 	     .C_S_AXI_ADDR_WIDTH(C_S00_AXI_ADDR_WIDTH)
-	     ) 
+	     )
    blinky_inst (
-		.led(led),
-      
+		.rgb(rgb),
+
 		.S_AXI_ACLK(s00_axi_aclk),
 		.S_AXI_ARESETN(s00_axi_aresetn),
 		.S_AXI_AWADDR(s00_axi_awaddr),
