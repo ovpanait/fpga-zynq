@@ -8,20 +8,31 @@ set int_type [lindex $argv 2]
 # IP info
 set ip_repo_path "[pwd]/ip_repo"
 set ip_path "[pwd]/ip_repo/$ip_name"
-
 file mkdir "[pwd]/ip_repo"
+
+set interface_name_slave [concat "S00_AXI" [expr {$axi_type == "stream" ? "S" : ""}]]
+set interface_name_master [concat "M00_AXI" [expr {$axi_type == "stream" ? "S" : ""}]]
 
 create_project -part xc7z020clg400-1 $ip_name $ip_path
 
+# Create peripheral
 create_peripheral user.org user $ip_name 1.0 -dir $ip_path
+set open_core [ipx::find_open_core user.org:user:$ip_name:1.0]
+
 if {$int_type == "slave" || $int_type == "master_slave"} {
-	add_peripheral_interface S00_AXIS -interface_mode slave -axi_type $axi_type [ipx::find_open_core user.org:user:$ip_name:1.0]
+    add_peripheral_interface $interface_name_slave \
+	-interface_mode slave \
+	-axi_type $axi_type \
+	$open_core
 }
 if {$int_type == "master" || $int_type == "master_slave"} {
-	add_peripheral_interface M00_AXIS -interface_mode master -axi_type $axi_type [ipx::find_open_core user.org:user:$ip_name:1.0]
+    add_peripheral_interface $interface_name_master \
+	-interface_mode master \
+	-axi_type $axi_type \
+	$open_core
 }
-generate_peripheral [ipx::find_open_core user.org:user:$ip_name:1.0]
-write_peripheral [ipx::find_open_core user.org:user:$ip_name:1.0]
+generate_peripheral $open_core
+write_peripheral $open_core
 
 # IP edit project
 ipx::edit_ip_in_project -upgrade true -name edit_$ip_name -directory $ip_path $ip_path/[set ip_name]_1.0/component.xml
