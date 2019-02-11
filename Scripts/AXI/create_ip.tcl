@@ -10,8 +10,12 @@ set ip_repo_path "[pwd]/ip_repo"
 set ip_path "[pwd]/ip_repo/$ip_name"
 file mkdir "[pwd]/ip_repo"
 
-set interface_name_slave [concat "S00_AXI" [expr {$axi_type == "stream" ? "S" : ""}]]
-set interface_name_master [concat "M00_AXI" [expr {$axi_type == "stream" ? "S" : ""}]]
+set interface_name_slave "S00_AXI"
+set interface_name_master "M00_AXI"
+if {$axi_type == "stream"} {
+	append interface_name_slave "S"
+	append interface_name_master "S"
+}
 
 create_project -part xc7z020clg400-1 $ip_name $ip_path
 
