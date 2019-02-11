@@ -21,6 +21,7 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:axi4stream_vip:1.1 axi4stream_vip_0
 endgroup
 set_property -dict [list CONFIG.TDATA_NUM_BYTES.VALUE_SRC USER] [get_bd_cells axi4stream_vip_0]
 set_property -dict [list CONFIG.INTERFACE_MODE {MASTER} CONFIG.TDATA_NUM_BYTES {4}] [get_bd_cells axi4stream_vip_0]
+set_property -dict [list CONFIG.HAS_TLAST {1}] [get_bd_cells axi4stream_vip_0]
 
 # Add verification slave
 startgroup
