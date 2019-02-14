@@ -27,19 +27,26 @@ class tester #(
 	 data_unpacked.delete();
 	 data_unpacked = new [WIDTH/UNPACKED_WIDTH];
 	 
-	 for (int i = 0; i < WIDTH/UNPACKED_WIDTH; ++i)
+	 for (int i = 0; i < $size(data_unpacked); ++i)
 	   data_unpacked[i] = data_in[WIDTH - (i + 1)*UNPACKED_WIDTH +: UNPACKED_WIDTH];
       end
    endtask
 
-   // big endian format
+   static task pack(input [UNPACKED_WIDTH-1:0] data[], output [WIDTH-1:0] out);
+      begin
+         for (int i = 0; i < $size(data); ++i)
+            out[i*UNPACKED_WIDTH +: UNPACKED_WIDTH] = data[i];
+      end
+   endtask
+
    static task print_unpacked(input [UNPACKED_WIDTH-1:0] data_unpacked[]);
       begin
-	 $write("0x");
+	 $write("debug: 0x");
 	 for(int i = 0; i < $size(data_unpacked); i++) begin
 	    $write("%H", data_unpacked[i]);
 	 end
 	 $display("");
       end
    endtask
+
 endclass
