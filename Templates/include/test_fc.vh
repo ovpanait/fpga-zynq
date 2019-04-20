@@ -49,4 +49,13 @@ class tester #(
       end
    endtask
 
+   // The bit direction is reversed
+   static task q_push_back32_rev(input [0:WIDTH-1] data, ref [0:31] queue[$]);
+   begin
+        for (integer i = 0; i < WIDTH / 32; i=i+1) begin
+                queue.push_back(data[i*32 +: 32]);
+        end
+   end
+   endtask
+
 endclass
