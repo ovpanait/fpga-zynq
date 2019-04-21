@@ -9,8 +9,8 @@ class tester #(
    static task verify_output(input [WIDTH-1:0] simulated_value, input [WIDTH-1:0] expected_value);
       begin
 	 `PRINT_DBG(simulated_value);
-	 	 
-	 if (simulated_value[WIDTH-1:0] != expected_value[WIDTH-1:0])
+
+	 if (simulated_value != expected_value)
 	   begin
 	      errors = errors + 1;
 	      $display("Simulated Value = %h \n Expected Value = %h \n errors = %d \n at time = %d",
@@ -50,10 +50,11 @@ class tester #(
    endtask
 
    // The bit direction is reversed
-   static task q_push_back32_rev(input [0:WIDTH-1] data, ref [0:31] queue[$]);
+   static task q_push_back32_rev(input [0:WIDTH-1] data, ref reg [0:31] queue[$]);
    begin
         for (integer i = 0; i < WIDTH / 32; i=i+1) begin
-                queue.push_back(data[i*32 +: 32]);
+                // Workaround because push_back/push_front doesn't work (?)
+                queue[queue.size()] = data[i*32 +: 32];
         end
    end
    endtask
