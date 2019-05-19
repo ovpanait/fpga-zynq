@@ -1,12 +1,11 @@
 // Test setup
-integer     errors;
 
 `define PRINT_DBG(var) $display("DEBUG: var: %H", var)
 
 class tester #(
 	       int unsigned WIDTH = 32,
 	       int unsigned UNPACKED_WIDTH = 8);
-   static task verify_output(input [WIDTH-1:0] simulated_value, input [WIDTH-1:0] expected_value);
+   static task verify_output(input [WIDTH-1:0] simulated_value, input [WIDTH-1:0] expected_value, ref integer errors);
       begin
 	 `PRINT_DBG(simulated_value);
 
