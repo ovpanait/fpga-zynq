@@ -24,6 +24,8 @@ module tb_main(
    design_1_axi4stream_vip_0_0_mst_t                              mst_agent;
    design_1_axi4stream_vip_1_0_slv_t                              slv_agent;
 
+   int transaction_no =  16;
+
    bit                                     clock;
    bit                                     reset;
 
@@ -65,12 +67,18 @@ module tb_main(
       
       fork
 	 begin
+             int last = 0;
 	    // FIFO size = 16 x 32-bit words
             $display("Sending 16 transactions...");
-	    
+
 	    for (int i = 0; i < 16; i=i+1) begin
-	       axi4stream_transaction wr_transaction;
-	       gen_rand_transaction(wr_transaction);
+	        axi4stream_transaction wr_transaction;
+	        gen_rand_transaction(wr_transaction);
+
+                if (i == (transaction_no - 1))
+                        last = 1;
+
+               wr_transaction.set_last(last);
 	       mst_agent.driver.send(wr_transaction);
 	    end
 	    
