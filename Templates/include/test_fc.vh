@@ -7,8 +7,6 @@ class tester #(
 	       int unsigned UNPACKED_WIDTH = 8);
    static task verify_output(input [WIDTH-1:0] simulated_value, input [WIDTH-1:0] expected_value, ref integer errors);
       begin
-	 `PRINT_DBG(simulated_value);
-
 	 if (simulated_value != expected_value)
 	   begin
 	      errors = errors + 1;
