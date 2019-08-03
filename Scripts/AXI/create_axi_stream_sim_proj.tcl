@@ -90,7 +90,7 @@ export_simulation \
     -use_ip_compiled_libs \
     -force \
     -directory "$outputDir/export_sim" \
-    -include "$env(INCLUDE_DIR)"
+    -include [list "[pwd]/hdl/include" "[pwd]/tb/include " "[pwd]/include"]
 
 close_project
 exit

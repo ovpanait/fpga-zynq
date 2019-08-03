@@ -6,6 +6,6 @@ export_simulation \
     -force \
     -simulator xsim \
     -directory "$outputDir/export_sim" \
-    -include [list "$env(INCLUDE_DIR)" "[pwd]/include"]
+    -include [list "[pwd]/hdl/include" "[pwd]/tb/include" "[pwd]/include"]
 
 exit
