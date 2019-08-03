@@ -42,10 +42,10 @@ write_peripheral $open_core
 ipx::edit_ip_in_project -upgrade true -name edit_$ip_name -directory $ip_path $ip_path/[set ip_name]_1.0/component.xml
 
 # Add hdl sources
-remove_files {*}[glob $ip_path/[set ip_name]_1.0/hdl/*.v]
-file delete {*}[glob $ip_path/[set ip_name]_1.0/hdl/*.v]
-add_files [glob hdl/*.v] -copy_to $ip_path/[set ip_name]_1.0/hdl
-add_files [glob -nocomplain hdl/*.vh] -quiet -copy_to $ip_path/[set ip_name]_1.0/hdl
+set ip_hdl_dir "$ip_path/[set ip_name]_1.0/hdl"
+remove_files {*}[glob "$ip_hdl_dir/*.v"]
+file delete {*}[glob "$ip_hdl_dir/*.v"]
+file copy {*}[add_files ./hdl] "$ip_hdl_dir"
 set_property top $ip_name [current_fileset]
 
 # Add testbench sources
