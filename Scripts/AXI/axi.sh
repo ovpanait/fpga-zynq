@@ -1,6 +1,5 @@
 #!/bin/bash
 
-IP_REPO_DIR="ip_repo"
 PROJ_DIR="test_proj"
 SIM_DIR="outputs"
 
@@ -31,6 +30,10 @@ while [ "$1" != "" ];do
     case ${OPT} in
 	"--help")
 	    HELP="1"
+	    ;;
+	"--ip-name")
+	    shift
+	    IP_NAME="$1"
 	    ;;
 	"--top")
 	    shift
@@ -70,6 +73,9 @@ if [ -z "${TOP}" ]; then
     exit 1
 fi
 
+IP_NAME="${IP_NAME:-$TOP}"
+IP_REPO_DIR="ip_repo_${IP_NAME}"
+
 if [ "${FORCE}" != "1" ]; then
     if [ -e "${IP_REPO_DIR}" ]; then
 	echo "ERROR: ${IP_REPO_DIR} directory exists. Run script with --force to override.";
@@ -85,7 +91,13 @@ fi
 rm -rf "${IP_REPO_DIR}"
 
 # Create AXI IP
-vivado -mode tcl -source "${SCRIPT_DIR}"/create_ip.tcl -nolog -nojour -tclargs "${TOP}" "${AXI_TYPE}" "${INT_TYPE}"
+vivado -mode tcl -source "${SCRIPT_DIR}"/create_ip.tcl -nolog -nojour -tclargs "${IP_NAME}" "${AXI_TYPE}" "${INT_TYPE}" $(pwd)
+ret=$?
+
+if [ $ret -ne 0 ]; then
+	echo "create_ip.tcl FAILED with exit code ret. Exiting.."
+	exit 1
+fi
 
 #
 # Create generic AXI-Stream simulation project
@@ -96,5 +108,5 @@ vivado -mode tcl -source "${SCRIPT_DIR}"/create_ip.tcl -nolog -nojour -tclargs "
 if [ "${AXIS_PROJ}" == "1" ]; then
     rm -rf "${SIM_DIR}"
     rm -rf "${PROJ_DIR}"
-    vivado -mode tcl -source "${SCRIPT_DIR}"/create_axi_stream_sim_proj.tcl -nolog -nojour -tclargs "${TOP}"
+    vivado -mode tcl -source "${SCRIPT_DIR}"/create_axi_stream_sim_proj.tcl -nolog -nojour -tclargs "${IP_NAME}"
 fi

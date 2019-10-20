@@ -3,7 +3,7 @@ set proj_path "[pwd]/$proj_name"
 
 set top [lindex $argv 0]
 set ip_name $top
-set ip_path "[pwd]/ip_repo/$ip_name"
+set ip_path "[pwd]/ip_repo_$ip_name/$ip_name"
 
 file mkdir $proj_path
 create_project -part xc7z020clg400-1 $proj_name $proj_path
@@ -68,7 +68,7 @@ launch_runs -jobs 8 {design_1_axi4stream_vip_0_0_synth_1 design_1_axi4stream_vip
 
 # Simulation
 set_property SOURCE_SET sources_1 [get_filesets sim_1]
-add_files -fileset [get_filesets sim_1] -norecurse [pwd]/tb/tb_main.sv
+add_files -fileset [get_filesets sim_1] [pwd]/tb
 
 foreach ip [get_ips] {
 	add_files -fileset [get_filesets sim_1] [get_files -compile_order sources -used_in simulation -of [get_files [set ip].xci]]
