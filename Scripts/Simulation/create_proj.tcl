@@ -8,4 +8,4 @@ read_verilog [glob -nocomplain ./hdl/*.sv] -quiet
 
 add_files -fileset [get_filesets sim_1] -norecurse [ glob -nocomplain ./tb/*.sv ] -quiet
 
-read_xdc [ glob -nocomplain ./constraints/*.xdc ] -quiet
+read_xdc [ glob -nocomplain ./xdc/*.xdc ] -quiet
